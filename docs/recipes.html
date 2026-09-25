@@ -13,7 +13,7 @@
   "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
   "lit-element/": "./lib/vendor/lit-element/",
   "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
-  "formulit": "./lib/formulit/src/index.js"
+  "@hidemikimura/formulit": "./lib/formulit/src/index.js"
 } }
 </script>
 <script type="module" src="assets/site.js"></script>
@@ -48,7 +48,7 @@
   </div>
 </div>
 <script type="module" id="up-script">
-  import 'formulit';
+  import '@hidemikimura/formulit';
   const ed = document.getElementById('up');
   const log = document.getElementById('up-log');
   ed.imageUploader = async (file) => {
@@ -127,7 +127,7 @@
 <p>変数の一覧をサーバーから受け取り、Lit のテンプレートで渡す例です。保存される HTML には <code>{{ customer_name }}</code> のような文字列がそのまま入るので、送信時にサーバー側のテンプレートエンジンで置き換えます。</p>
 <script type="text/plain" class="code" data-lang="js">
   import { LitElement, html } from 'lit';
-  import 'formulit';
+  import '@hidemikimura/formulit';
 
   class MailTemplateForm extends LitElement {
     static properties = { variables: { state: true } };

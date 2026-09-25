@@ -19,8 +19,12 @@ description: formulit（Lit 用 WYSIWYG エディタ <formulit-editor>）を組�
 
 ## 最小の使い方
 
+```bash
+npm install @hidemikimura/formulit lit   # lit 3 は peerDependency
+```
+
 ```js
-import 'formulit'; // <formulit-editor> が定義され、組み込みプラグインが登録される（副作用 import）
+import '@hidemikimura/formulit'; // <formulit-editor> が定義され、組み込みプラグインが登録される（副作用 import）
 ```
 
 ```html
@@ -69,11 +73,11 @@ ed.variables = [{ type: 'group', label: '商品', variables: [{ label: '商品�
                                                       // 差し込み変数（{{ product_name }} を挿入。recipes.md）
 ```
 
-コンパクトな既定値が欲しい場合は `import { COMPACT_TOOLBAR } from 'formulit'` を `ed.toolbar` に渡す。
+コンパクトな既定値が欲しい場合は `import { COMPACT_TOOLBAR } from '@hidemikimura/formulit'` を `ed.toolbar` に渡す。
 
 ## ありがちな間違い
 
-- `import { FormulitEditor } from 'formulit'` だけで要素定義されると思い込む → `import 'formulit'` の時点で定義・登録済み。二重定義はしない（`customElements.define` を自分で呼ばない）。
+- `import { FormulitEditor } from '@hidemikimura/formulit'` だけで要素定義されると思い込む → `import '@hidemikimura/formulit'` の時点で定義・登録済み。二重定義はしない（`customElements.define` を自分で呼ばない）。
 - `ed.value = html` の直後に `ed.dirty` が `true` だと期待する → `value` の設定は「新しい原文」として扱われ `dirty` は `false`（サニタイズで何か除去した場合だけ `true`）。
 - 独自ボタンの `action` 内で `editor.editable` を直接いじり、`transact` を使わない → 元に戻せない・`input` が飛ばない。
 - `toolbar` 属性にグループを書こうとする → プロパティで配列を渡す。

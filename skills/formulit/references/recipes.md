@@ -4,7 +4,7 @@
 
 ```js
 import { LitElement, html } from 'lit';
-import 'formulit';
+import '@hidemikimura/formulit';
 
 class ArticleForm extends LitElement {
   static properties = { body: { type: String } };
@@ -86,7 +86,7 @@ form.addEventListener('submit', (e) => {
 ## ツールバーを絞る・まとめる
 
 ```js
-import { COMPACT_TOOLBAR } from 'formulit';
+import { COMPACT_TOOLBAR } from '@hidemikimura/formulit';
 ed.toolbar = COMPACT_TOOLBAR;                         // まとめたプリセット
 ed.toolbar = ['bold', 'italic', '|', 'link', { label: '⋯', items: ['source', 'fullscreen'] }];
 ```
@@ -143,10 +143,10 @@ formulit は ES モジュールのまま配布している。import map で `lit
   "lit-element/": "https://cdn.jsdelivr.net/npm/lit-element@4/",
   "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/reactive-element.js",
   "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/",
-  "formulit": "/path/to/formulit/src/index.js"
+  "@hidemikimura/formulit": "https://cdn.jsdelivr.net/npm/@hidemikimura/formulit@0.1/src/index.js"
 } }
 </script>
-<script type="module">import 'formulit';</script>
+<script type="module">import '@hidemikimura/formulit';</script>
 ```
 
 ## script を含む HTML をそのまま扱う（管理者向け CMS など）

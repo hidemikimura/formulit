@@ -37,7 +37,7 @@ ed.toolbar = [
 - 表示条件（`visible`）で中身が空になったグループは表示しない。
 - Ctrl/⌘+F などでグループ内のパネルを開く場合はグループごと開く（`editor.openDropdownItem(name)`）。
 
-プリセット: `import { COMPACT_TOOLBAR } from 'formulit'`（主要ボタン + 「文字」「段落」「挿入」「⋯」のグループ）。
+プリセット: `import { COMPACT_TOOLBAR } from '@hidemikimura/formulit'`（主要ボタン + 「文字」「段落」「挿入」「⋯」のグループ）。
 
 ## 項目名
 

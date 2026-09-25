@@ -19,7 +19,7 @@ skills/formulit/
 
   ```bash
   mkdir -p .claude/skills
-  cp -r node_modules/formulit/skills/formulit .claude/skills/
+  cp -r node_modules/@hidemikimura/formulit/skills/formulit .claude/skills/
   ```
 
 - **Claude（claude.ai / デスクトップアプリ）**: `skills/formulit` フォルダを zip にして、設定の「スキル」からアップロードします。

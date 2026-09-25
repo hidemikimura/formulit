@@ -13,7 +13,7 @@
   "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
   "lit-element/": "./lib/vendor/lit-element/",
   "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
-  "formulit": "./lib/formulit/src/index.js"
+  "@hidemikimura/formulit": "./lib/formulit/src/index.js"
 } }
 </script>
 <script type="module" src="assets/site.js"></script>
@@ -175,7 +175,7 @@
   </div>
 </div>
 <script type="module" id="f-script">
-  import 'formulit';
+  import '@hidemikimura/formulit';
   const prod = document.getElementById('f-prod');
   prod.autosave = async () => { await new Promise((r) => setTimeout(r, 400)); };
   document.getElementById('f-format').formatStyles = [{ name: 'リード文', element: 'p', classes: ['lead'] }];

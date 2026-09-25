@@ -1,10 +1,45 @@
 {
-  "name": "formulit",
+  "name": "@hidemikimura/formulit",
   "version": "0.1.0",
   "description": "Lit で使える、手書き HTML を欠落させない WYSIWYG エディタ（<formulit-editor>）",
+  "keywords": [
+    "wysiwyg",
+    "editor",
+    "rich-text",
+    "html-editor",
+    "lit",
+    "web-components",
+    "custom-elements",
+    "contenteditable",
+    "formulit"
+  ],
+  "homepage": "https://hidemikimura.github.io/formulit/",
+  "bugs": {
+    "url": "https://github.com/hidemikimura/formulit/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hidemikimura/formulit.git"
+  },
+  "license": "MIT",
+  "author": "Hidemi Kimura",
+  "type": "module",
   "main": "src/index.js",
-  "directories": {
-    "test": "test"
+  "module": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "./src/index.js"
+  ],
+  "files": [
+    "src",
+    "skills",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "start": "npx --yes http-server -c-1 -o /demo/ .",
@@ -13,23 +48,17 @@
     "perf": "node test/perf.mjs large",
     "docs:build": "node scripts/build-docs.mjs",
     "docs": "node scripts/build-docs.mjs && npx --yes http-server -c-1 -o / docs",
-    "test:docs": "node test/docs.mjs"
+    "test:docs": "node test/docs.mjs",
+    "release:check": "node scripts/release-check.mjs",
+    "prepublishOnly": "npm run release:check",
+    "release:notes": "node scripts/release-notes.mjs",
+    "version": "node scripts/sync-version.mjs && git add docs/assets/site.js"
   },
-  "license": "MIT",
+  "peerDependencies": {
+    "lit": "^3.0.0"
+  },
   "devDependencies": {
     "playwright": "^1.63.0",
     "lit": "^3.3.3"
-  },
-  "type": "module",
-  "module": "src/index.js",
-  "exports": {
-    ".": "./src/index.js"
-  },
-  "files": [
-    "src",
-    "skills"
-  ],
-  "peerDependencies": {
-    "lit": "^3.0.0"
   }
 }

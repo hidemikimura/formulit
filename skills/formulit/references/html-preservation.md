@@ -35,4 +35,4 @@
 - **「独自プラグインで変えた部分が保存されない／元に戻せない」** → `transact` の外で DOM を変えている。
 - **「入力が重い」** → `input` のたびに `value` を読んで大きな DOM に描画していないか。150ms 程度間引く。エディタ側の処理は 300 段落の文書で 1 文字あたり約 1ms。
 - **「本文にサイトの CSS が効いてしまう／効かない」** → 編集領域はライト DOM。`formulit-editor .formulit-editable …` のセレクタで調整する。
-- **比較したいとき** → `import { serialize } from 'formulit'` の `serialize(ed.editable)` がブラウザ標準のシリアライズ（原文保持なし）。`preserve-source="false"` でも同じ出力になる。
+- **比較したいとき** → `import { serialize } from '@hidemikimura/formulit'` の `serialize(ed.editable)` がブラウザ標準のシリアライズ（原文保持なし）。`preserve-source="false"` でも同じ出力になる。

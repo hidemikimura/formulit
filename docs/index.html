@@ -13,7 +13,7 @@
   "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
   "lit-element/": "./lib/vendor/lit-element/",
   "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
-  "formulit": "./lib/formulit/src/index.js"
+  "@hidemikimura/formulit": "./lib/formulit/src/index.js"
 } }
 </script>
 <script type="module" src="assets/site.js"></script>
@@ -28,7 +28,7 @@
       <a class="btn" href="playground.html">プレイグラウンドで試す</a>
       <a class="btn" href="html-preservation.html">HTML 保持の仕組み</a>
     </div>
-    <p><span class="install">npm install formulit lit</span></p>
+    <p><span class="install">npm install @hidemikimura/formulit lit</span></p>
   </section>
 
   <h2 id="demo">ライブデモ</h2>
@@ -53,7 +53,7 @@
     </div>
   </div>
   <script type="module">
-    import { COMPACT_TOOLBAR } from 'formulit';
+    import { COMPACT_TOOLBAR } from '@hidemikimura/formulit';
     const ed = document.getElementById('hero');
     ed.toolbar = COMPACT_TOOLBAR;
     const out = document.getElementById('hero-out');
@@ -86,7 +86,7 @@
   <h2 id="quick">かんたんな使い方</h2>
   <script type="text/plain" class="code" data-lang="html">
     <script type="module">
-      import 'formulit';
+      import '@hidemikimura/formulit';
     <\/script>
 
     <form>

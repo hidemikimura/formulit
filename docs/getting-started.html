@@ -13,7 +13,7 @@
   "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
   "lit-element/": "./lib/vendor/lit-element/",
   "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
-  "formulit": "./lib/formulit/src/index.js"
+  "@hidemikimura/formulit": "./lib/formulit/src/index.js"
 } }
 </script>
 <script type="module" src="assets/site.js"></script>
@@ -26,7 +26,7 @@
 
 <h2 id="install">インストール</h2>
 <script type="text/plain" class="code" data-lang="bash">
-  npm install formulit lit
+  npm install @hidemikimura/formulit lit
 </script>
 <p><code>lit</code> 3 が必要です（peerDependency）。ビルド不要の ES モジュールなので、Vite などのバンドラーでも、ビルドなしの import map でも使えます。</p>
 
@@ -42,16 +42,16 @@
     "lit-element/": "https://cdn.jsdelivr.net/npm/lit-element@4/",
     "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/reactive-element.js",
     "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/",
-    "formulit": "./node_modules/formulit/src/index.js"
+    "@hidemikimura/formulit": "https://cdn.jsdelivr.net/npm/@hidemikimura/formulit@0.1/src/index.js"
   } }
   <\/script>
 </script>
 
 <h2 id="minimal">最小の例</h2>
-<p><code>import 'formulit'</code> で <code>&lt;formulit-editor&gt;</code> が定義され、組み込みの機能（プラグイン）がすべて登録されます。</p>
+<p><code>import '@hidemikimura/formulit'</code> で <code>&lt;formulit-editor&gt;</code> が定義され、組み込みの機能（プラグイン）がすべて登録されます。</p>
 <script type="text/plain" class="code" data-lang="html">
   <script type="module">
-    import 'formulit';
+    import '@hidemikimura/formulit';
   <\/script>
 
   <formulit-editor placeholder="本文を入力…"></formulit-editor>
@@ -60,7 +60,7 @@
 <h3>Lit のコンポーネントから使う</h3>
 <script type="text/plain" class="code" data-lang="js">
   import { LitElement, html } from 'lit';
-  import 'formulit';
+  import '@hidemikimura/formulit';
 
   class ArticleForm extends LitElement {
     static properties = { body: { type: String } };
@@ -118,7 +118,7 @@
   </div>
 </div>
 <script type="module" id="ev-script">
-  import 'formulit';
+  import '@hidemikimura/formulit';
   const ed = document.getElementById('ev');
   let inputs = 0;
   let changes = 0;
@@ -155,7 +155,7 @@
   </div>
 </div>
 <script type="module" id="fm-script">
-  import 'formulit';
+  import '@hidemikimura/formulit';
   const form = document.getElementById('fm');
   form.addEventListener('submit', (e) => {
     e.preventDefault();

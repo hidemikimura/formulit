@@ -13,7 +13,7 @@
   "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
   "lit-element/": "./lib/vendor/lit-element/",
   "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
-  "formulit": "./lib/formulit/src/index.js"
+  "@hidemikimura/formulit": "./lib/formulit/src/index.js"
 } }
 </script>
 <script type="module" src="assets/site.js"></script>
@@ -49,7 +49,7 @@
   </div>
 </div>
 <script type="module" id="hp-script">
-  import { serialize } from 'formulit';
+  import { serialize } from '@hidemikimura/formulit';
   const ed = document.getElementById('hp');
   const src = document.getElementById('hp-src');
   src.value = `<h2 class='title' data-id=42>お知らせ</h2>

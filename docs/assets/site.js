@@ -26,6 +26,8 @@ function buildChrome() {
       <a href="api.html">API</a>
       <a href="plugins.html">プラグイン</a>
       <a href="playground.html">プレイグラウンド</a>
+      <a href="https://github.com/hidemikimura/formulit" rel="noopener">GitHub</a>
+      <a href="https://www.npmjs.com/package/@hidemikimura/formulit" rel="noopener">npm</a>
     </nav>
     <button class="menu-btn" type="button" aria-label="メニュー">☰ メニュー</button>`);
   header.querySelectorAll('nav a').forEach((a) => { if (a.getAttribute('href') === here) a.classList.add('on'); });
@@ -67,7 +69,7 @@ function buildChrome() {
   }
 
   document.body.prepend(header);
-  document.body.append(el('footer', { class: 'site-footer' }, 'formulit — Lit で使える、手書き HTML を欠落させない WYSIWYG エディタ（MIT License）'));
+  document.body.append(el('footer', { class: 'site-footer' }, `formulit v${VERSION} — Lit で使える、手書き HTML を欠落させない WYSIWYG エディタ · <a href="https://github.com/hidemikimura/formulit">GitHub</a> · <a href="https://github.com/hidemikimura/formulit/blob/main/CHANGELOG.md">変更履歴</a> · MIT License © Hidemi Kimura`));
   const title = main.querySelector('h1')?.textContent;
   if (title && here !== 'index.html') document.title = `${title} | formulit`;
 }

@@ -1,43 +1,28 @@
 # formulit
 
-Lit で使える WYSIWYG エディタ（プロトタイプ / 素の JavaScript・ビルド不要）。
+[![npm](https://img.shields.io/npm/v/@hidemikimura/formulit)](https://www.npmjs.com/package/@hidemikimura/formulit)
+[![license](https://img.shields.io/npm/l/@hidemikimura/formulit)](LICENSE)
+
+Lit で使える WYSIWYG エディタ `<formulit-editor>`（素の JavaScript・ビルド不要）。
 CKEditor・Trumbowyg を参考に、**手書きの HTML を欠落させないこと**を最優先に設計しています。
 
-## 動かし方
+- 📘 ドキュメント（ライブデモ付き）: https://hidemikimura.github.io/formulit/
+- 🧪 プレイグラウンド: https://hidemikimura.github.io/formulit/playground.html
+- 📝 変更履歴: [CHANGELOG.md](CHANGELOG.md)
+
+## インストール
 
 ```bash
-npm install
-npm start      # demo/index.html をブラウザで開く
-npm test                  # Chromium で 87 項目の動作テスト（HTML 保持・部分的な原文保持・書式・表・貼り付け・生産性・フォーム連携など）
-BROWSER=firefox npm test  # Firefox で実行（webkit も指定可）
-npm run test:all          # Chromium / Firefox / WebKit(Safari のエンジン) の 3 つで実行
-npm run perf              # 大きな文書（約 300 段落）での 1 文字入力あたりの処理時間を計測（BROWSER= で切替）
-npm run docs              # ドキュメントサイトをビルドして表示
-npm run test:docs         # ドキュメントの全ページとライブデモの動作確認
+npm install @hidemikimura/formulit lit
 ```
 
-> テストで Playwright のブラウザが見つからない場合は `npx playwright install chromium firefox webkit` を実行してください。
-
-## ドキュメントサイトと AI 用スキル
-
-- **ドキュメントサイト**（ライブデモ付き）: `docs/`。`npm run docs` でローカル表示。`npm run docs:build` でライブラリ本体と lit を `docs/lib/` にコピーするので、`docs/` をそのまま静的ホスティングに置けます。
-- **AI 用スキル**: `skills/formulit/`（Agent Skills 形式）。利用するプロジェクトの `.claude/skills/` にコピーすると、Claude が formulit のコードを正しく書けるようになります（詳しくは `skills/README.md`）。
-
-### GitHub Pages で公開する
-
-`.github/workflows/pages.yml` が、main ブランチへの push のたびにドキュメントサイトを生成して公開します（`docs/lib/`・`docs/skills/`・スキルの zip はワークフロー内で作るので、コミット不要です。`.gitignore` 済み）。
-
-1. GitHub のリポジトリで **Settings → Pages → Build and deployment → Source** を **GitHub Actions** にする。
-2. main に push する（または **Actions → Deploy docs to GitHub Pages → Run workflow**）。
-3. 完了すると `https://<ユーザー名>.github.io/<リポジトリ名>/` で公開される（URL は Actions の実行結果と Settings → Pages に表示）。
-
-ワークフローは公開前に `npm run test:docs`（全ページを Chromium で開き、エラーがなくデモのエディタが動くこと）を実行し、失敗したら公開しません。ページ内のリンクと読み込みはすべて相対パスなので、`/<リポジトリ名>/` 配下でもそのまま動きます。
+`lit` 3 が必要です（peerDependency）。ES モジュールのまま配布しているので、Vite などのバンドラーでも、ビルドなしの import map でも使えます。
 
 ## 使い方
 
 ```html
 <script type="module">
-  import 'formulit';            // <formulit-editor> が定義される
+  import '@hidemikimura/formulit';            // <formulit-editor> が定義される
 </script>
 
 <form>
@@ -75,7 +60,7 @@ html`<formulit-editor .value=${this.body} @input=${(e) => (this.body = e.target.
   "lit-element/": "https://cdn.jsdelivr.net/npm/lit-element@4/",
   "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/reactive-element.js",
   "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/",
-  "formulit": "./node_modules/formulit/src/index.js"
+  "@hidemikimura/formulit": "https://cdn.jsdelivr.net/npm/@hidemikimura/formulit@0.1/src/index.js"
 } }
 </script>
 ```
@@ -201,7 +186,7 @@ ed.toolbar = [
 - 中のどれかが押下状態（太字の中にカーソルがあるなど）のときは、グループのボタンも押下表示になります。
 - Ctrl/⌘+F などのショートカットでグループの中のパネル（検索など）を開く場合は、グループごと開きます。
 - `icon` に渡した HTML 文字列はそのまま描画されます。利用者の入力など信頼できない値は渡さないでください。
-- グループでまとめたプリセット `COMPACT_TOOLBAR` もあります（`import { COMPACT_TOOLBAR } from 'formulit'`）。コンテキストツールバーの `items` にもグループを書けます。
+- グループでまとめたプリセット `COMPACT_TOOLBAR` もあります（`import { COMPACT_TOOLBAR } from '@hidemikimura/formulit'`）。コンテキストツールバーの `items` にもグループを書けます。
 
 ツールバー項目名（`toolbar` に指定）: `undo` `redo` `format` `styles` `fontFamily` `fontSize` `lineHeight` `bold` `italic` `underline` `strike` `sup` `sub` `code` `fontColor` `bgColor` `painter` `caseChange` `specialChars` `ul` `ol` `outdent` `indent` `alignLeft` `alignCenter` `alignRight` `link` `unlink` `image` `table` `mediaEmbed` `codeBlock` `htmlEmbed` `quote` `hr` `pageBreak` `toc` `todoList` `listStyle` `findReplace` `clear` `source` `fullscreen` `shortcuts`、区切りは `|`
 
@@ -243,7 +228,7 @@ Quill や CKEditor 5 は HTML を内部モデルに変換するため、モデ�
 組み込みの機能もすべてプラグインとして実装されています（`src/plugins/`）。
 
 ```js
-import { registerPlugin } from 'formulit';
+import { registerPlugin } from '@hidemikimura/formulit';
 import { html } from 'lit';
 
 registerPlugin({
@@ -289,6 +274,44 @@ registerPlugin({
 | `insertVariable(valueOrVariable)` | 変数を挿入（`'sku'` または `{ label, value }`） |
 | `toggleFullscreen(force?)` | 全画面表示の切り替え |
 
+## 開発
+
+### 動かし方
+
+```bash
+git clone https://github.com/hidemikimura/formulit.git
+cd formulit
+npm install
+npm start      # demo/index.html をブラウザで開く
+npm test                  # Chromium で 95 項目の動作テスト（HTML 保持・部分的な原文保持・書式・表・貼り付け・生産性・フォーム連携など）
+BROWSER=firefox npm test  # Firefox で実行（webkit も指定可）
+npm run test:all          # Chromium / Firefox / WebKit(Safari のエンジン) の 3 つで実行
+npm run perf              # 大きな文書（約 300 段落）での 1 文字入力あたりの処理時間を計測（BROWSER= で切替）
+npm run docs              # ドキュメントサイトをビルドして表示
+npm run test:docs         # ドキュメントの全ページとライブデモの動作確認
+```
+
+> テストで Playwright のブラウザが見つからない場合は `npx playwright install chromium firefox webkit` を実行してください。
+
+### ドキュメントサイトと AI 用スキル
+
+- **ドキュメントサイト**（ライブデモ付き）: `docs/`。`npm run docs` でローカル表示。`npm run docs:build` でライブラリ本体と lit を `docs/lib/` にコピーするので、`docs/` をそのまま静的ホスティングに置けます。
+- **AI 用スキル**: `skills/formulit/`（Agent Skills 形式）。利用するプロジェクトの `.claude/skills/` にコピーすると、Claude が formulit のコードを正しく書けるようになります（詳しくは `skills/README.md`）。
+
+### ドキュメントサイトを GitHub Pages で公開する
+
+`.github/workflows/pages.yml` が、main ブランチへの push のたびにドキュメントサイトを生成して公開します（`docs/lib/`・`docs/skills/`・スキルの zip はワークフロー内で作るので、コミット不要です。`.gitignore` 済み）。
+
+1. GitHub のリポジトリで **Settings → Pages → Build and deployment → Source** を **GitHub Actions** にする。
+2. main に push する（または **Actions → Deploy docs to GitHub Pages → Run workflow**）。
+3. 完了すると `https://<ユーザー名>.github.io/<リポジトリ名>/` で公開される（URL は Actions の実行結果と Settings → Pages に表示）。
+
+ワークフローは公開前に `npm run test:docs`（全ページを Chromium で開き、エラーがなくデモのエディタが動くこと）を実行し、失敗したら公開しません。ページ内のリンクと読み込みはすべて相対パスなので、`/<リポジトリ名>/` 配下でもそのまま動きます。
+
+### リリース
+
+手順は [RELEASING.md](RELEASING.md)、変更点は [CHANGELOG.md](CHANGELOG.md) にあります。`npm publish` の前に `npm run release:check`（バージョン表記・パッケージの中身・import の解決・ブラウザテスト）が自動で実行されます。
+
 ## 構成
 
 ```
@@ -328,3 +351,7 @@ test/perf.mjs         入力性能の計測
 - 画像のアップロード中（数秒）の `value` にはプレビュー用の `blob:` URL が入ります。完了後に本来の URL へ差し替わります。
 - 画像・表・埋め込みを末尾に挿入すると、続けて入力できるよう空の段落（`<p><br></p>`）が後ろに入ります。
 - メディア埋め込みは iframe で出力します（CKEditor 既定の `<oembed>` 方式ではないため、表示側での変換は不要）。
+
+## ライセンス
+
+[MIT](LICENSE) © Hidemi Kimura

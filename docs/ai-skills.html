@@ -13,7 +13,7 @@
   "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
   "lit-element/": "./lib/vendor/lit-element/",
   "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
-  "formulit": "./lib/formulit/src/index.js"
+  "@hidemikimura/formulit": "./lib/formulit/src/index.js"
 } }
 </script>
 <script type="module" src="assets/site.js"></script>
@@ -47,10 +47,10 @@
 <p><a class="btn primary" href="assets/formulit-skill.zip" download>スキルをダウンロード（zip）</a></p>
 
 <h2 id="claude-code">Claude Code で使う</h2>
-<p>formulit を使うプロジェクトの <code>.claude/skills/</code> にフォルダごとコピーします。npm でインストールしていれば <code>node_modules/formulit/skills/</code> に入っています。</p>
+<p>formulit を使うプロジェクトの <code>.claude/skills/</code> にフォルダごとコピーします。npm でインストールしていれば <code>node_modules/@hidemikimura/formulit/skills/</code> に入っています。</p>
 <script type="text/plain" class="code" data-lang="bash">
   mkdir -p .claude/skills
-  cp -r node_modules/formulit/skills/formulit .claude/skills/
+  cp -r node_modules/@hidemikimura/formulit/skills/formulit .claude/skills/
 </script>
 <p>以後、formulit に関する依頼（「記事の編集画面に formulit を組み込んで」「画像を S3 にアップロードするようにして」「独自のボタンを追加して」など）で自動的に使われます。</p>
 

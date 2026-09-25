@@ -128,7 +128,7 @@ formulit-editor .formulit-editable { font-size: 16px; line-height: 1.8; }
 formulit-editor .lead { font-size: 1.15em; }
 ```
 
-## export（`import { … } from 'formulit'`）
+## export（`import { … } from '@hidemikimura/formulit'`）
 
 - 要素・定数: `FormulitEditor`, `DEFAULT_TOOLBAR`, `COMPACT_TOOLBAR`, `DEFAULT_PROTECT`, `DEFAULT_FONT_FAMILIES`, `DEFAULT_FONT_SIZES`, `DEFAULT_LINE_HEIGHTS`, `DEFAULT_COLORS`, `SPECIAL_CHARS`, `DEFAULT_IMAGE_STYLES`, `DEFAULT_CODE_LANGUAGES`, `MEDIA_PROVIDERS`, `SLASH_COMMANDS`, `SHORTCUTS`, `MARKDOWN_SHORTCUTS`, `DEFAULT_VARIABLE_FORMAT`, `icons`
 - プラグイン: `registerPlugin`, `getPlugin`, `getPlugins`, `corePlugin`, `basicPlugin`, `formattingPlugin`, `typingPlugin`, `codeBlockPlugin`, `listsPlugin`, `linkPlugin`, `imagePlugin`, `embedPlugin`, `productivityPlugin`, `tablePlugin`, `variablesPlugin`

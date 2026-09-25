@@ -3,8 +3,8 @@
 組み込み機能もすべてプラグインとして実装されている。独自プラグインは `registerPlugin()` で登録し、項目名を `toolbar` に書くと表示される。
 
 ```js
-import 'formulit';
-import { registerPlugin } from 'formulit';
+import '@hidemikimura/formulit';
+import { registerPlugin } from '@hidemikimura/formulit';
 import { html } from 'lit';
 
 registerPlugin({
@@ -164,7 +164,7 @@ keymap: {
 編集中だけ属性を変えたい（例: チェックボックスの `disabled` を外してクリック可能にする）場合、`prepare` で `setTemp` を使う。書き出し時に値と属性の並び順が元に戻る。
 
 ```js
-import { setTemp } from 'formulit';
+import { setTemp } from '@hidemikimura/formulit';
 registerPlugin({
   name: 'widgets',
   prepare(root) {
