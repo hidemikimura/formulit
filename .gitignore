@@ -1,6 +1,7 @@
 node_modules/
 test/screenshot*.png
 .idea/
+.DS_Store
 
 # ドキュメントサイトの生成物（npm run docs:build / GitHub Actions で作る）
 docs/lib/
