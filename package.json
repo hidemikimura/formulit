@@ -1,0 +1,35 @@
+{
+  "name": "formulit",
+  "version": "0.1.0",
+  "description": "Lit で使える、手書き HTML を欠落させない WYSIWYG エディタ（<formulit-editor>）",
+  "main": "src/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "start": "npx --yes http-server -c-1 -o /demo/ .",
+    "test": "node test/run.mjs",
+    "test:all": "BROWSER=chromium node test/run.mjs && BROWSER=firefox node test/run.mjs && BROWSER=webkit node test/run.mjs",
+    "perf": "node test/perf.mjs large",
+    "docs:build": "node scripts/build-docs.mjs",
+    "docs": "node scripts/build-docs.mjs && npx --yes http-server -c-1 -o / docs",
+    "test:docs": "node test/docs.mjs"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "playwright": "^1.63.0",
+    "lit": "^3.3.3"
+  },
+  "type": "module",
+  "module": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "skills"
+  ],
+  "peerDependencies": {
+    "lit": "^3.0.0"
+  }
+}

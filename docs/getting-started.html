@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>インストールと基本 | formulit</title>
+<meta name="description" content="formulit のインストール、最小の使い方、初期値の渡し方、値の取得とイベント、フォーム連携。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<script type="importmap">
+{ "imports": {
+  "lit": "./lib/vendor/lit/index.js", "lit/": "./lib/vendor/lit/",
+  "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
+  "lit-element/": "./lib/vendor/lit-element/",
+  "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
+  "formulit": "./lib/formulit/src/index.js"
+} }
+</script>
+<script type="module" src="assets/site.js"></script>
+</head>
+
+<body>
+<main>
+<h1>インストールと基本</h1>
+<p class="lead">formulit を読み込んで <code>&lt;formulit-editor&gt;</code> を置くまでと、値の受け渡しの基本です。</p>
+
+<h2 id="install">インストール</h2>
+<script type="text/plain" class="code" data-lang="bash">
+  npm install formulit lit
+</script>
+<p><code>lit</code> 3 が必要です（peerDependency）。ビルド不要の ES モジュールなので、Vite などのバンドラーでも、ビルドなしの import map でも使えます。</p>
+
+<h3>ビルドなし（import map）で使う</h3>
+<p><code>lit</code> 一式（lit / lit-html / lit-element / @lit/reactive-element）を import map で解決します。<code>lit@3/+esm</code> の 1 ファイルだけにすると、formulit が使う <code>lit/directives/…</code> が別のコピーになるので避けてください。</p>
+<script type="text/plain" class="code" data-lang="html">
+  <script type="importmap">
+  { "imports": {
+    "lit": "https://cdn.jsdelivr.net/npm/lit@3/index.js",
+    "lit/": "https://cdn.jsdelivr.net/npm/lit@3/",
+    "lit-html": "https://cdn.jsdelivr.net/npm/lit-html@3/lit-html.js",
+    "lit-html/": "https://cdn.jsdelivr.net/npm/lit-html@3/",
+    "lit-element/": "https://cdn.jsdelivr.net/npm/lit-element@4/",
+    "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/reactive-element.js",
+    "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/",
+    "formulit": "./node_modules/formulit/src/index.js"
+  } }
+  <\/script>
+</script>
+
+<h2 id="minimal">最小の例</h2>
+<p><code>import 'formulit'</code> で <code>&lt;formulit-editor&gt;</code> が定義され、組み込みの機能（プラグイン）がすべて登録されます。</p>
+<script type="text/plain" class="code" data-lang="html">
+  <script type="module">
+    import 'formulit';
+  <\/script>
+
+  <formulit-editor placeholder="本文を入力…"></formulit-editor>
+</script>
+
+<h3>Lit のコンポーネントから使う</h3>
+<script type="text/plain" class="code" data-lang="js">
+  import { LitElement, html } from 'lit';
+  import 'formulit';
+
+  class ArticleForm extends LitElement {
+    static properties = { body: { type: String } };
+
+    constructor() {
+      super();
+      this.body = '<p>初期値</p>';
+    }
+
+    render() {
+      return html`
+        <formulit-editor
+          .value=${this.body}
+          placeholder="本文"
+          @input=${(e) => { this.body = e.target.value; }}
+        ></formulit-editor>
+        <p>${this.body.length} 文字（HTML）</p>`;
+    }
+  }
+  customElements.define('article-form', ArticleForm);
+</script>
+<div class="note"><p><code>.value=${this.body}</code> は値が変わるたびにエディタへ設定されます。<code>@input</code> で受け取った値をそのまま戻す分には、同じ文字列なので再設定されません。外から別の文字列を入れると「新しい原文」として読み込み直し、元に戻す履歴はリセットされます。</p></div>
+
+<h2 id="initial">初期値の渡し方</h2>
+<table>
+  <tr><th>方法</th><th>原文の保持</th></tr>
+  <tr><td>子に <code>&lt;script type="text/html"&gt;…&lt;/script&gt;</code></td><td><strong>1 文字も変えずに</strong>読み込みます（中で <code>&lt;/script&gt;</code> を書くときは <code>&lt;\/script&gt;</code>）</td></tr>
+  <tr><td><code>value</code> プロパティに文字列を設定</td><td>1 文字も変えずに読み込みます（サーバーから受け取った HTML など）</td></tr>
+  <tr><td>子に <code>&lt;template&gt;…&lt;/template&gt;</code> / <code>value</code> 属性</td><td>ブラウザが先にパースするため、引用符・大文字・文字参照の書き方は整形されます（内容は保持）</td></tr>
+</table>
+<script type="text/plain" class="code" data-lang="html">
+  <formulit-editor>
+    <script type="text/html">
+      <h2 class='title'>見出し</h2>
+      <P CLASS=lead>この書き方のまま保持されます &copy; 2026</P>
+    <\/script>
+  </formulit-editor>
+</script>
+
+<h2 id="value">値の取得と変更の検知</h2>
+<ul>
+  <li><code>editor.value</code>（または <code>getHTML()</code>）で HTML を取得、代入（または <code>setHTML(html)</code>）で設定します。</li>
+  <li><code>input</code> イベント: 内容が変わるたび（入力・書式変更・元に戻す など）。<code>event.target</code> は <code>&lt;formulit-editor&gt;</code> です。</li>
+  <li><code>change</code> イベント: フォーカスが外れたとき、内容が変わっていれば。</li>
+  <li><code>editor.dirty</code>: 読み込んでから編集されたか。</li>
+</ul>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>入力するとイベントの回数と value が更新されます</div>
+  <div class="demo-body">
+    <formulit-editor id="ev" toolbar="undo redo | bold italic link">
+      <script type="text/html"><p>ここを編集してみてください。</p></script>
+    </formulit-editor>
+    <p style="font-size:13px;margin:10px 0 0">input: <b id="ev-input">0</b> 回 ／ change: <b id="ev-change">0</b> 回 ／ dirty: <b id="ev-dirty">false</b></p>
+    <pre class="out" id="ev-out"></pre>
+  </div>
+</div>
+<script type="module" id="ev-script">
+  import 'formulit';
+  const ed = document.getElementById('ev');
+  let inputs = 0;
+  let changes = 0;
+  const show = () => {
+    document.getElementById('ev-out').textContent = ed.value;
+    document.getElementById('ev-dirty').textContent = String(ed.dirty);
+  };
+  ed.addEventListener('input', () => {
+    document.getElementById('ev-input').textContent = ++inputs;
+    show();
+  });
+  ed.addEventListener('change', () => {
+    document.getElementById('ev-change').textContent = ++changes;
+  });
+  await customElements.whenDefined('formulit-editor');
+  show();
+</script>
+<script type="text/plain" class="code" data-lang="js" data-from="ev-script"></script>
+<div class="tip"><p><code>input</code> のたびに大きな DOM へ <code>value</code> を描画する処理は重くなります。表示の更新は 150ms 程度間引くのがおすすめです。</p></div>
+
+<h2 id="form">フォームで送信する</h2>
+<p><code>name</code> を付けて <code>&lt;form&gt;</code> に入れると、送信データ（<code>FormData</code>）に HTML が入ります（Form-associated Custom Element）。<code>form.reset()</code> で初期値に戻り、<code>&lt;fieldset disabled&gt;</code> の中では読み取り専用になります。</p>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>送信すると FormData の中身を表示します（実際には送信しません）</div>
+  <div class="demo-body">
+    <form id="fm">
+      <p style="margin:0 0 8px;font-size:14px"><label>タイトル <input name="title" value="お知らせ" style="font:inherit;padding:2px 6px"></label></p>
+      <formulit-editor name="body" toolbar="bold italic | ul ol | link">
+        <script type="text/html"><p>本文です。</p></script>
+      </formulit-editor>
+      <p style="margin:10px 0 0"><button class="btn primary">送信</button> <button class="btn" type="reset">リセット</button></p>
+    </form>
+    <pre class="out" id="fm-out"></pre>
+  </div>
+</div>
+<script type="module" id="fm-script">
+  import 'formulit';
+  const form = document.getElementById('fm');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    document.getElementById('fm-out').textContent =
+      [...data].map(([k, v]) => `${k} = ${v}`).join('\n');
+  });
+</script>
+<script type="text/plain" class="code" data-lang="html">
+  <form method="post" action="/articles">
+    <formulit-editor name="body"></formulit-editor>
+    <button>保存</button>
+  </form>
+</script>
+
+<h2 id="next">次に読む</h2>
+<ul>
+  <li><a href="configuration.html">設定</a> — 属性・プロパティ、書式の選択肢、見た目の調整</li>
+  <li><a href="toolbar.html">ツールバー</a> — 項目の並びとグループ</li>
+  <li><a href="html-preservation.html">HTML 保持の仕組み</a> — 何がそのまま残り、何が変わるか</li>
+</ul>
+</main>
+</body>
+</html>

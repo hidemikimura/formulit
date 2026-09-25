@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>formulit — 手書き HTML を欠落させない Lit 製 WYSIWYG エディタ</title>
+<meta name="description" content="formulit は Lit で使える WYSIWYG エディタ。class・data-*・独自要素・コメントなど手書きの HTML を欠落させず、編集していない部分は元の文字列のまま返します。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<script type="importmap">
+{ "imports": {
+  "lit": "./lib/vendor/lit/index.js", "lit/": "./lib/vendor/lit/",
+  "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
+  "lit-element/": "./lib/vendor/lit-element/",
+  "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
+  "formulit": "./lib/formulit/src/index.js"
+} }
+</script>
+<script type="module" src="assets/site.js"></script>
+</head>
+<body>
+<main>
+  <section class="hero">
+    <h1><span>formulit</span> — 手書き HTML を欠落させない WYSIWYG エディタ</h1>
+    <p class="lead">Lit で使えるリッチテキストエディタ（<code>&lt;formulit-editor&gt;</code>）です。class・style・data-*・独自要素・コメント・iframe などを保持し、<strong>編集していない部分は元の文字列のまま</strong>返します。CKEditor 5 のオープンソース機能をおおむね備え、ビルド不要の ES モジュールで動きます。</p>
+    <div class="actions">
+      <a class="btn primary" href="getting-started.html">はじめる →</a>
+      <a class="btn" href="playground.html">プレイグラウンドで試す</a>
+      <a class="btn" href="html-preservation.html">HTML 保持の仕組み</a>
+    </div>
+    <p><span class="install">npm install formulit lit</span></p>
+  </section>
+
+  <h2 id="demo">ライブデモ</h2>
+  <p>手書きの HTML を読み込んだエディタです。下の「value」に、エディタが返す HTML がそのまま表示されます。一部を編集しても、触っていない部分の書き方（シングルクォート・大文字タグ・<code>&amp;copy;</code>・コメントなど）は変わりません。</p>
+  <div class="demo">
+    <div class="demo-head"><b>ライブデモ</b><span id="hero-state">未編集：読み込んだ文字列をそのまま返しています</span></div>
+    <div class="demo-body">
+      <formulit-editor id="hero" word-count>
+        <script type="text/html">
+<h2 class='title' data-id="42">手書き HTML の保持</h2>
+<P CLASS=lead>formulit は <strong>class</strong> や <span style="color:#c00" data-tip="赤">独自のスタイル</span>、空の要素 <i class="icon icon-star"></i> も保持します &copy; 2026</P>
+<!-- CMS 用のコメントも残ります -->
+<div class="note" data-type="info"><p>class 付きの <code>div</code> ブロック。一般的なエディタでは <code>p</code> に変換されがちです。</p></div>
+<ul>
+  <li>終了タグを省略した項目
+  <li>そのまま残ります
+</ul>
+<my-badge level="3">独自要素</my-badge>
+        </script>
+      </formulit-editor>
+      <pre class="out" id="hero-out"></pre>
+    </div>
+  </div>
+  <script type="module">
+    import { COMPACT_TOOLBAR } from 'formulit';
+    const ed = document.getElementById('hero');
+    ed.toolbar = COMPACT_TOOLBAR;
+    const out = document.getElementById('hero-out');
+    const state = document.getElementById('hero-state');
+    ed.formatStyles = [
+      { name: 'リード文', element: 'p', classes: ['lead'] },
+      { name: 'お知らせボックス', element: 'div', classes: ['note'] },
+      { name: 'マーカー', element: 'span', classes: ['marker'] },
+    ];
+    let t;
+    const show = () => {
+      out.textContent = ed.value;
+      state.textContent = ed.dirty ? '編集済み：変更した部分だけ書き直し、他は原文のまま' : '未編集：読み込んだ文字列をそのまま返しています';
+    };
+    ed.addEventListener('input', () => { clearTimeout(t); t = setTimeout(show, 150); });
+    await customElements.whenDefined('formulit-editor');
+    show();
+  </script>
+
+  <h2 id="features">特長</h2>
+  <div class="features">
+    <div class="card"><div class="ico">🧩</div><h3>手書き HTML を保持</h3><p>モデルに変換せず DOM をそのまま編集。未編集なら 1 文字も変えず、編集後も触っていない部分は原文のまま返します。</p></div>
+    <div class="card"><div class="ico">⚡</div><h3>Lit ネイティブ</h3><p>カスタム要素なので Lit のテンプレートに <code>.value</code> と <code>@input</code> で組み込めます。フォームにもそのまま入ります。</p></div>
+    <div class="card"><div class="ico">🧰</div><h3>CKEditor 相当の機能</h3><p>書式・画像・表（結合・分割）・メディア埋め込み・コードブロック・検索置換・自動保存・目次・差し込み変数など。</p></div>
+    <div class="card"><div class="ico">🎛️</div><h3>ツールバーを自由に構成</h3><p>項目の並びに加えて、<code>{ label, items }</code> でドロップダウンにまとめられます。アイコンも指定可能。</p></div>
+    <div class="card"><div class="ico">🔌</div><h3>プラグインで拡張</h3><p>組み込み機能もすべてプラグイン。ボタン・セレクト・ドロップダウン・ショートカットを数行で追加できます。</p></div>
+    <div class="card"><div class="ico">🇯🇵</div><h3>日本語入力に対応</h3><p>IME の変換中はショートカットを無視し、確定した文字にも書式を適用。Chrome・Firefox・Safari で検証済み。</p></div>
+  </div>
+
+  <h2 id="quick">かんたんな使い方</h2>
+  <script type="text/plain" class="code" data-lang="html">
+    <script type="module">
+      import 'formulit';
+    <\/script>
+
+    <form>
+      <formulit-editor name="body" placeholder="本文を入力…">
+        <template><p>初期値の HTML</p></template>
+      </formulit-editor>
+    </form>
+  </script>
+  <p>詳しくは <a href="getting-started.html">インストールと基本</a> へ。</p>
+
+  <h2 id="ai">AI と一緒に使う</h2>
+  <p>formulit のコードを Claude などの AI に正しく書かせるための <a href="ai-skills.html">AI 用スキル</a> を同梱しています。プロジェクトの <code>.claude/skills/</code> にコピーするだけで使えます。</p>
+</main>
+</body>
+</html>

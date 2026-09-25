@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>レシピ | formulit</title>
+<meta name="description" content="formulit のよくある実装例：画像アップロード、自動保存、文字数制限、読み取り専用、スタイルの追加、script を含む HTML、差し込み変数、複数エディタ。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<script type="importmap">
+{ "imports": {
+  "lit": "./lib/vendor/lit/index.js", "lit/": "./lib/vendor/lit/",
+  "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
+  "lit-element/": "./lib/vendor/lit-element/",
+  "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
+  "formulit": "./lib/formulit/src/index.js"
+} }
+</script>
+<script type="module" src="assets/site.js"></script>
+</head>
+
+<body>
+<main>
+<h1>レシピ</h1>
+<p class="lead">実際の組み込みでよく使う実装例です。</p>
+
+<h2 id="upload">画像をサーバーへアップロードする</h2>
+<p><code>imageUploader</code> に「ファイルを受け取って URL を返す関数」を設定すると、画像ボタンのファイル選択・ドラッグ＆ドロップ・スクリーンショットの貼り付けのすべてで使われます。失敗（例外）すると挿入した画像は取り除かれ、<code>formulit-upload-error</code> が発生します。</p>
+<script type="text/plain" class="code" data-lang="js">
+  ed.imageUploader = async (file) => {
+    const body = new FormData();
+    body.append('file', file);
+    const res = await fetch('/api/images', { method: 'POST', body });
+    if (!res.ok) throw new Error('upload failed');
+    return (await res.json()).url;
+  };
+  ed.addEventListener('formulit-upload-error', (e) => {
+    alert(`アップロードに失敗しました: ${e.detail.file.name}`);
+  });
+</script>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>画像ファイルをドロップ／貼り付け／画像ボタンから選ぶと、1 秒かけて「アップロード」します（この例ではファイル名を URL にするだけ）</div>
+  <div class="demo-body">
+    <formulit-editor id="up" toolbar="image | bold italic">
+      <script type="text/html"><p>ここに画像ファイルをドロップしてください。</p></script>
+    </formulit-editor>
+    <pre class="out" id="up-log"></pre>
+  </div>
+</div>
+<script type="module" id="up-script">
+  import 'formulit';
+  const ed = document.getElementById('up');
+  const log = document.getElementById('up-log');
+  ed.imageUploader = async (file) => {
+    log.textContent += `アップロード中: ${file.name}\n`;
+    await new Promise((r) => setTimeout(r, 1000));
+    return URL.createObjectURL(file); // 実際にはサーバーが返した URL
+  };
+  ed.addEventListener('formulit-upload', (e) => { log.textContent += `完了: ${e.detail.file.name}\n`; });
+</script>
+<p>アップロード中の <code>value</code> には一時的なプレビュー用 URL（<code>blob:</code>）が入り、完了後に差し替わります。未設定のときは data URL（Base64）で埋め込みます。</p>
+
+<h2 id="autosave">自動保存</h2>
+<script type="text/plain" class="code" data-lang="js">
+  ed.autosaveDelay = 3000; // 入力が止まってから 3 秒後
+  ed.autosave = async (html) => {
+    const res = await fetch('/api/draft', { method: 'PUT', body: html });
+    if (!res.ok) throw new Error('save failed'); // 「保存に失敗しました」と表示される
+  };
+</script>
+<p>状態（未保存の変更あり・保存中・保存しました・失敗）はステータスバーに表示され、未保存のままページを離れようとすると確認が出ます。Ctrl/⌘+S か <code>ed.saveNow()</code> ですぐ保存します。</p>
+
+<h2 id="limit">文字数制限のあるフォーム</h2>
+<script type="text/plain" class="code" data-lang="html">
+  <formulit-editor name="summary" max-chars="400"></formulit-editor>
+</script>
+<p><code>max-chars</code> は表示のみ（超えると赤字）です。送信を止めるなら自分で判定します。</p>
+<script type="text/plain" class="code" data-lang="js">
+  form.addEventListener('submit', (e) => {
+    if (ed.getStats().chars > 400) {
+      e.preventDefault();
+      alert('400 文字以内にしてください');
+    }
+  });
+</script>
+
+<h2 id="readonly">読み取り専用のプレビュー</h2>
+<script type="text/plain" class="code" data-lang="html">
+  <formulit-editor readonly toolbar=""></formulit-editor>
+</script>
+<p>表示するだけなら、保存した HTML をそのままページに出す方が軽量です（エディタ固有のマークアップは出力に含まれません）。</p>
+
+<h2 id="styles">サイト独自のクラスを選べるようにする</h2>
+<script type="text/plain" class="code" data-lang="js">
+  ed.formatStyles = [
+    { name: 'リード文', element: 'p', classes: ['lead'] },
+    { name: '注意ボックス', element: 'div', classes: ['note'] },
+    { name: 'マーカー', element: 'span', classes: ['marker'] },
+  ];
+</script>
+<p>クラスの見た目はページ側の CSS で定義します。エディタの中にも同じ CSS が効くので、編集中から実際の見た目で確認できます。</p>
+
+<h2 id="image-class">画像の配置をクラスで出力する</h2>
+<script type="text/plain" class="code" data-lang="js">
+  ed.imageStyles = [
+    { name: 'inline', label: '文中' },
+    { name: 'alignLeft', label: '左寄せ', classes: ['image-left'] },
+    { name: 'alignCenter', label: '中央', classes: ['image-center'] },
+    { name: 'alignRight', label: '右寄せ', classes: ['image-right'] },
+  ];
+</script>
+<p>既定は <code>style="float: left; …"</code> なので、表示側に CSS がなくても配置されます。</p>
+
+<h2 id="sanitize">script を含む HTML をそのまま扱う</h2>
+<script type="text/plain" class="code" data-lang="html">
+  <formulit-editor sanitize="none"></formulit-editor>
+</script>
+<div class="warn"><p><code>script</code>・<code>on*</code> 属性・<code>javascript:</code> URL を出力に残します（編集中は実行されないよう無効化）。信頼できる利用者だけが使う管理画面などで使い、表示側で XSS 対策を行ってください。</p></div>
+
+<h2 id="protect">特定の要素を編集させない</h2>
+<script type="text/plain" class="code" data-lang="html">
+  <formulit-editor protect="iframe, .widget, [data-protect]"></formulit-editor>
+</script>
+<p>一致する要素は編集中だけ <code>contenteditable=false</code>（丸ごと選択・削除のみ）になります。出力には付きません。</p>
+
+<h2 id="variables">メールテンプレートに差し込み変数を入れる</h2>
+<p>変数の一覧をサーバーから受け取り、Lit のテンプレートで渡す例です。保存される HTML には <code>{{ customer_name }}</code> のような文字列がそのまま入るので、送信時にサーバー側のテンプレートエンジンで置き換えます。</p>
+<script type="text/plain" class="code" data-lang="js">
+  import { LitElement, html } from 'lit';
+  import 'formulit';
+
+  class MailTemplateForm extends LitElement {
+    static properties = { variables: { state: true } };
+    constructor() { super(); this.variables = []; }
+    async connectedCallback() {
+      super.connectedCallback();
+      // 例: [{ type: 'group', label: '顧客', variables: [{ label: '氏名', value: 'customer_name' }] }]
+      this.variables = await (await fetch('/api/mail-variables')).json();
+    }
+    render() {
+      return html`<formulit-editor name="body"
+        .toolbar=${['undo', 'redo', '|', 'bold', 'italic', 'link', '|', 'variable']}
+        .variables=${this.variables}
+        @formulit-variable-insert=${(e) => console.log('挿入:', e.detail.text)}></formulit-editor>`;
+    }
+  }
+  customElements.define('mail-template-form', MailTemplateForm);
+</script>
+<p>Handlebars 形式以外（<code>${name}</code> や <code>%name%</code>）を使うときは <code>variableFormat</code> を設定します（<a href="features.html#variables">詳細</a>）。</p>
+
+<h2 id="multiple">1 ページに複数のエディタ</h2>
+<p>いくつ置いても構いません（履歴・検索・設定はエディタごと）。プラグインの登録は全エディタ共通なので、エディタごとに機能を変えるなら <code>plugins</code> / <code>toolbar</code> をそれぞれ設定します。</p>
+<script type="text/plain" class="code" data-lang="html">
+  <formulit-editor name="summary" toolbar="bold italic link" plugins="core basic link"></formulit-editor>
+  <formulit-editor name="body"></formulit-editor>
+</script>
+</main>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ツールバー | formulit</title>
+<meta name="description" content="formulit のツールバーの指定方法、グループ（ドロップダウンにまとめる）、アイコン、項目名の一覧。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<script type="importmap">
+{ "imports": {
+  "lit": "./lib/vendor/lit/index.js", "lit/": "./lib/vendor/lit/",
+  "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
+  "lit-element/": "./lib/vendor/lit-element/",
+  "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
+  "formulit": "./lib/formulit/src/index.js"
+} }
+</script>
+<script type="module" src="assets/site.js"></script>
+</head>
+
+<body>
+<main>
+<h1>ツールバー</h1>
+<p class="lead">並べる項目を配列で指定します。<code>{ label, items }</code> を書くと、その項目を 1 つのドロップダウンにまとめられます。</p>
+
+<h2 id="basic">指定方法</h2>
+<p><code>editor.toolbar</code> に配列を渡します（未指定なら <code>DEFAULT_TOOLBAR</code>）。要素は「項目名」「<code>'|'</code>（区切り線）」「グループ」のいずれかです。</p>
+<script type="text/plain" class="code" data-lang="js">
+  const ed = document.querySelector('formulit-editor');
+  ed.toolbar = ['undo', 'redo', '|', 'bold', 'italic', 'underline', '|', 'link', 'image'];
+</script>
+<p>グループを使わないなら属性でも書けます: <code>&lt;formulit-editor toolbar="bold italic | link"&gt;</code></p>
+
+<h2 id="groups">グループ</h2>
+<script type="text/plain" class="code" data-lang="js">
+  ed.toolbar = [
+    { label: '履歴', items: ['undo', 'redo', 'findReplace'] },
+    '|',
+    'format', 'styles', { label: '...', items: ['fontFamily', 'fontSize', 'lineHeight'] },
+    '|',
+    { label: '装飾', items: ['bold', 'italic', 'underline', 'strike', 'sup', 'sub', 'code'] },
+  ];
+  // 表示: 履歴▼ | [本文▾] [スタイル▼] ...▼ | 装飾▼
+</script>
+<table>
+  <tr><th>キー</th><th>説明</th></tr>
+  <tr><td><code>items</code></td><td>中に入れる項目名の配列。<code>'|'</code> で区切り線。フォントなどのセレクトや、文字色などのドロップダウンも入れられます（パネルの中で入れ子に開きます）</td></tr>
+  <tr><td><code>label</code></td><td>ボタンに表示する文字</td></tr>
+  <tr><td><code>icon</code></td><td>ボタンのアイコン。項目名（<code>'bold'</code> → 太字のアイコン）、HTML 文字列、Lit の <code>html</code> / <code>svg</code> テンプレート。<code>label</code> と併用できます</td></tr>
+  <tr><td><code>title</code></td><td>ツールチップ（省略時は <code>label</code>）</td></tr>
+  <tr><td><code>keepOpen</code></td><td><code>true</code> なら、中の項目を実行してもパネルを閉じません（既定は閉じる）</td></tr>
+  <tr><td><code>name</code></td><td>グループの識別名（任意）</td></tr>
+</table>
+<ul>
+  <li><code>label</code> と <code>icon</code> をどちらも省略すると <code>⋯</code> と表示します。</li>
+  <li>中のどれかが押下状態（太字の中にカーソルがあるなど）のときは、グループのボタンも押下表示になります。</li>
+  <li>Ctrl/⌘+F などのショートカットでグループの中のパネルを開く場合は、グループごと開きます。</li>
+</ul>
+<div class="warn"><p><code>icon</code> に渡した HTML 文字列はそのまま描画されます。開発者が書いた固定の値だけを渡し、利用者の入力など信頼できない値は渡さないでください。</p></div>
+
+<h2 id="playground">試してみる</h2>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>配列を書き換えて「適用」を押すと、上のエディタのツールバーが変わります</div>
+  <div class="demo-body">
+    <div class="controls">
+      <button class="btn" type="button" data-preset="example">グループの例</button>
+      <button class="btn" type="button" data-preset="icon">アイコン指定の例</button>
+      <button class="btn" type="button" data-preset="compact">COMPACT_TOOLBAR</button>
+      <button class="btn" type="button" data-preset="default">DEFAULT_TOOLBAR</button>
+    </div>
+    <formulit-editor id="tb">
+      <script type="text/html"><p>ツールバーの見た目と操作を試してください。<strong>太字</strong>の中にカーソルを置くと、「装飾」のボタンも押下表示になります。</p></script>
+    </formulit-editor>
+    <textarea class="src" id="tb-src" spellcheck="false" style="margin-top:12px"></textarea>
+    <div class="controls" style="margin:8px 0 0"><button class="btn primary" type="button" id="tb-apply">適用</button><span id="tb-msg" style="color:#c5221f"></span></div>
+  </div>
+</div>
+<script type="module" id="tb-script">
+  import { DEFAULT_TOOLBAR, COMPACT_TOOLBAR } from 'formulit';
+  const ed = document.getElementById('tb');
+  const src = document.getElementById('tb-src');
+  const presets = {
+    example: `[
+  { label: '履歴', items: ['undo', 'redo', 'findReplace'] },
+  '|',
+  'format', 'styles', { label: '...', items: ['fontFamily', 'fontSize', 'lineHeight'] },
+  '|',
+  { label: '装飾', items: ['bold', 'italic', 'underline', 'strike', 'sup', 'sub', 'code'] },
+]`,
+    icon: `[
+  { icon: '<span style="background:#ffe58f;padding:0 3px">M</span>', title: '履歴', items: ['undo', 'redo', 'findReplace'] },
+  { icon: 'bold', label: '装飾', items: ['bold', 'italic', 'underline', '|', 'fontColor', 'bgColor'] },
+  'link', 'image',
+  { items: ['source', 'fullscreen', 'shortcuts'] },
+]`,
+    compact: JSON.stringify(COMPACT_TOOLBAR, null, 2),
+    default: JSON.stringify(DEFAULT_TOOLBAR).replace(/,/g, ', '),
+  };
+  const apply = () => {
+    try {
+      // デモ用：入力された配列をそのまま評価する
+      ed.toolbar = new Function(`return (${src.value})`)();
+      document.getElementById('tb-msg').textContent = '';
+    } catch (e) {
+      document.getElementById('tb-msg').textContent = `書き方に誤りがあります: ${e.message}`;
+    }
+  };
+  for (const b of document.querySelectorAll('[data-preset]')) {
+    b.onclick = () => { src.value = presets[b.dataset.preset]; apply(); };
+  }
+  document.getElementById('tb-apply').onclick = apply;
+  src.value = presets.example;
+  apply();
+</script>
+
+<h2 id="items">項目名の一覧</h2>
+<table>
+  <tr><th>分類</th><th>項目名</th></tr>
+  <tr><td>履歴・検索</td><td><code>undo</code> <code>redo</code> <code>findReplace</code></td></tr>
+  <tr><td>段落</td><td><code>format</code>（本文・見出し1〜4・整形済み）<code>styles</code>（<code>formatStyles</code> 設定時のみ表示）<code>lineHeight</code> <code>alignLeft</code> <code>alignCenter</code> <code>alignRight</code> <code>indent</code> <code>outdent</code> <code>quote</code></td></tr>
+  <tr><td>文字</td><td><code>bold</code> <code>italic</code> <code>underline</code> <code>strike</code> <code>sup</code> <code>sub</code> <code>code</code> <code>fontFamily</code> <code>fontSize</code> <code>fontColor</code> <code>bgColor</code> <code>painter</code>（書式のコピー）<code>caseChange</code> <code>specialChars</code> <code>clear</code></td></tr>
+  <tr><td>リスト</td><td><code>ul</code> <code>ol</code> <code>todoList</code> <code>listStyle</code></td></tr>
+  <tr><td>挿入</td><td><code>link</code> <code>unlink</code> <code>image</code> <code>table</code> <code>mediaEmbed</code> <code>codeBlock</code> <code>htmlEmbed</code> <code>hr</code> <code>pageBreak</code> <code>toc</code> <code>variable</code>（<code>variables</code> 設定時のみ表示）</td></tr>
+  <tr><td>表示・その他</td><td><code>source</code> <code>fullscreen</code> <code>shortcuts</code></td></tr>
+</table>
+<p>存在しない項目名は無視されます。<a href="plugins.html">独自プラグイン</a>の項目名も同じように書けます。</p>
+
+<h2 id="context">コンテキストツールバー</h2>
+<p>画像・表・埋め込みを選ぶと、その上に専用のツールバーが表示されます。次の項目はメインのツールバーにも置けます。</p>
+<table>
+  <tr><th>対象</th><th>項目名</th></tr>
+  <tr><td>画像</td><td><code>imgInline</code> <code>imgAlignLeft</code> <code>imgAlignCenter</code> <code>imgAlignRight</code> <code>imgCaption</code> <code>imgEdit</code> <code>imgDelete</code></td></tr>
+  <tr><td>表</td><td><code>tableRowAbove</code> <code>tableRowAdd</code> <code>tableColLeft</code> <code>tableColAdd</code> <code>tableRowDel</code> <code>tableColDel</code> <code>tableMerge</code> <code>tableSplitV</code> <code>tableSplitH</code> <code>tableHeaderRow</code> <code>tableHeaderCol</code> <code>tableCaption</code> <code>tableProps</code> <code>cellProps</code> <code>tableDel</code></td></tr>
+  <tr><td>埋め込み</td><td><code>embedEdit</code> <code>embedDelete</code></td></tr>
+  <tr><td>目次</td><td><code>tocUpdate</code></td></tr>
+</table>
+
+<h2 id="limit">機能を絞る</h2>
+<ul>
+  <li>ボタンを減らすだけなら <code>toolbar</code> から外します。<strong>ショートカットや入力変換は残ります</strong>（<code>bold</code> を外しても Ctrl+B は効く）。</li>
+  <li>機能ごと無効にするなら <code>plugins</code> で有効なプラグインを列挙します（例: <code>plugins="core basic link"</code>）。組み込みプラグイン: <code>core</code> <code>basic</code> <code>formatting</code> <code>typing</code> <code>codeBlock</code> <code>lists</code> <code>link</code> <code>image</code> <code>embed</code> <code>productivity</code> <code>table</code></li>
+  <li>入力変換だけ止めるなら <code>autoformat="false"</code>、スラッシュコマンドは <code>editor.slashCommands = false</code>。</li>
+</ul>
+</main>
+</body>
+</html>

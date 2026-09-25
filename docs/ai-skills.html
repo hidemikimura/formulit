@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI 用スキル | formulit</title>
+<meta name="description" content="formulit を使うコードを Claude などの AI に正しく書かせるためのスキル（Agent Skills 形式）の導入方法。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<script type="importmap">
+{ "imports": {
+  "lit": "./lib/vendor/lit/index.js", "lit/": "./lib/vendor/lit/",
+  "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
+  "lit-element/": "./lib/vendor/lit-element/",
+  "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
+  "formulit": "./lib/formulit/src/index.js"
+} }
+</script>
+<script type="module" src="assets/site.js"></script>
+</head>
+
+<body>
+<main>
+<h1>AI 用スキル</h1>
+<p class="lead">formulit を組み込む・設定する・プラグインで拡張するコードを、Claude などの AI に正しく書かせるためのスキルを同梱しています。</p>
+
+<h2 id="what">スキルとは</h2>
+<p><a href="https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview">Agent Skills</a> の形式（<code>SKILL.md</code> と参考資料）で書かれた、AI 向けの手引きです。AI は formulit に関する作業のときだけ読み込み、必要に応じて詳しい資料を参照します。</p>
+<p>次のような、よくある間違いを防ぎます。</p>
+<ul>
+  <li><code>editable.innerHTML</code> を直接書き換えて、履歴や原文保持を壊す</li>
+  <li>独自プラグインで <code>transact</code> を使わず、元に戻せない変更をする</li>
+  <li>ツールバーのグループを属性に書こうとする、プラグインの登録が遅くて <code>init</code> が動かない</li>
+  <li>初期値を <code>&lt;template&gt;</code> で渡して「原文そのまま」を期待する</li>
+</ul>
+
+<h2 id="files">構成</h2>
+<table>
+  <tr><th>ファイル</th><th>内容</th></tr>
+  <tr><td><a href="skills/formulit/SKILL.md"><code>SKILL.md</code></a></td><td>概要・最小の使い方・必ず守ること・よくある間違い</td></tr>
+  <tr><td><a href="skills/formulit/references/api.md"><code>references/api.md</code></a></td><td>属性・プロパティ・メソッド・イベント・CSS 変数・export</td></tr>
+  <tr><td><a href="skills/formulit/references/toolbar.md"><code>references/toolbar.md</code></a></td><td>ツールバー項目名とグループ</td></tr>
+  <tr><td><a href="skills/formulit/references/plugins.md"><code>references/plugins.md</code></a></td><td>独自プラグインの作り方</td></tr>
+  <tr><td><a href="skills/formulit/references/recipes.md"><code>references/recipes.md</code></a></td><td>実装例（Lit・フォーム・アップロード・自動保存・CDN など）</td></tr>
+  <tr><td><a href="skills/formulit/references/html-preservation.md"><code>references/html-preservation.md</code></a></td><td>HTML 保持の仕組みとトラブルシューティング</td></tr>
+</table>
+<p><a class="btn primary" href="assets/formulit-skill.zip" download>スキルをダウンロード（zip）</a></p>
+
+<h2 id="claude-code">Claude Code で使う</h2>
+<p>formulit を使うプロジェクトの <code>.claude/skills/</code> にフォルダごとコピーします。npm でインストールしていれば <code>node_modules/formulit/skills/</code> に入っています。</p>
+<script type="text/plain" class="code" data-lang="bash">
+  mkdir -p .claude/skills
+  cp -r node_modules/formulit/skills/formulit .claude/skills/
+</script>
+<p>以後、formulit に関する依頼（「記事の編集画面に formulit を組み込んで」「画像を S3 にアップロードするようにして」「独自のボタンを追加して」など）で自動的に使われます。</p>
+
+<h2 id="claude-app">Claude（claude.ai・デスクトップアプリ）で使う</h2>
+<ol>
+  <li>上のボタンから <code>formulit-skill.zip</code> をダウンロードします。</li>
+  <li>Claude の設定の「スキル」から zip をアップロードします。</li>
+</ol>
+
+<h2 id="prompts">依頼の例</h2>
+<ul>
+  <li>「Lit の記事編集フォームに formulit を入れて、本文を <code>body</code> として送信できるようにして」</li>
+  <li>「ツールバーを『履歴』『装飾』『挿入』のグループにまとめて」</li>
+  <li>「画像を <code>/api/images</code> にアップロードし、失敗したらトーストで知らせて」</li>
+  <li>「選択した文字を <code>&lt;span class="ruby"&gt;</code> で囲むボタンをプラグインで追加して」</li>
+  <li>「入力が 3 秒止まったら下書きを保存して、保存状態を表示して」</li>
+</ul>
+
+<div class="note"><p>ライブラリの API を変更したときは、<code>skills/formulit/</code> も合わせて更新してください。<code>npm run docs:build</code> でこのサイトの閲覧用コピーと zip も更新されます。</p></div>
+</main>
+</body>
+</html>

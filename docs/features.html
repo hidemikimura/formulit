@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>機能一覧 | formulit</title>
+<meta name="description" content="formulit の機能（書式、画像、表、埋め込み、コードブロック、入力補助、生産性）をライブデモで紹介します。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<script type="importmap">
+{ "imports": {
+  "lit": "./lib/vendor/lit/index.js", "lit/": "./lib/vendor/lit/",
+  "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
+  "lit-element/": "./lib/vendor/lit-element/",
+  "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
+  "formulit": "./lib/formulit/src/index.js"
+} }
+</script>
+<script type="module" src="assets/site.js"></script>
+</head>
+
+<body>
+<main>
+<h1>機能一覧</h1>
+<p class="lead">CKEditor 5 のオープンソース機能をおおむね備えています。各デモで実際に操作できます。</p>
+
+<h2 id="format">書式</h2>
+<table>
+  <tr><th>分類</th><th>機能</th></tr>
+  <tr><td>段落</td><td>本文 / 見出し1〜4 / 整形済み、スタイル（クラス適用）、行間、配置、インデント、引用、水平線</td></tr>
+  <tr><td>文字</td><td>太字、斜体、下線、取り消し線、上付き、下付き、インラインコード、フォント、文字サイズ、文字色、背景色</td></tr>
+  <tr><td>入力補助</td><td>書式のコピー、大文字・小文字の変換（Shift+F3）、特殊文字・絵文字、書式をクリア</td></tr>
+</table>
+<p>文字色・サイズなどは <code>&lt;span style="…"&gt;</code> で出力します（<code>&lt;font&gt;</code> や 7 段階のサイズは使いません）。範囲を選ばずに指定すると、次に入力する文字（日本語入力の確定文字を含む）に適用されます。</p>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>文字を選んで書式を付けてみてください</div>
+  <div class="demo-body">
+    <formulit-editor id="f-format" toolbar="format fontFamily fontSize lineHeight | bold italic underline strike code | fontColor bgColor painter caseChange specialChars clear">
+      <script type="text/html"><h2>見出し</h2><p>これは <b>太字</b> と <span style="color: rgb(230, 76, 76);">色付きの文字</span>、<code>inline code</code> を含む段落です。hello world を選んで Shift+F3 を押すと大文字・小文字が切り替わります。</p></script>
+    </formulit-editor>
+  </div>
+</div>
+
+<h2 id="image">画像</h2>
+<ul>
+  <li>挿入・編集（URL・代替テキスト・サイズ）。ファイルは選択・<strong>ドラッグ＆ドロップ</strong>・<strong>貼り付け</strong>でアップロード（<code>imageUploader</code> 未設定なら data URL で埋め込み）。</li>
+  <li>画像をクリックすると専用ツールバー: 配置（文中・左・中央・右）、キャプション、設定、リンク、削除。四隅のハンドルでリサイズ。</li>
+</ul>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>画像をクリックしてみてください（この例のアップロードは data URL）</div>
+  <div class="demo-body">
+    <formulit-editor id="f-image" toolbar="image link | bold italic">
+      <script type="text/html"><p>画像の周りに文章があります。左寄せにすると、この文章が回り込みます。</p><figure class="image" style="display: table; margin: 1em auto;"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180'%3E%3Crect width='320' height='180' fill='%239ecbff'/%3E%3Ccircle cx='80' cy='60' r='26' fill='%23fff'/%3E%3Cpath d='M0 180 110 90 190 150 250 110 320 160 320 180Z' fill='%235b9bd5'/%3E%3C/svg%3E" alt="山と空のイラスト" width="240"><figcaption>キャプションも編集できます</figcaption></figure><p>画像ファイルをここにドラッグ＆ドロップしても挿入できます。</p></script>
+    </formulit-editor>
+  </div>
+</div>
+
+<h2 id="table">表</h2>
+<ul>
+  <li>行・列の挿入（上下左右）と削除、<strong>セルの結合・分割</strong>、見出し行・見出し列、キャプション、表とセルのプロパティ（枠線・背景・幅・配置）。</li>
+  <li>結合セル（rowspan / colspan）をまたぐ操作でも表の形が崩れないように処理します。Tab で次のセルへ（最後のセルでは行を追加）。</li>
+</ul>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>セルをドラッグで複数選び、表のツールバーの「結合」を押してみてください</div>
+  <div class="demo-body">
+    <formulit-editor id="f-table" toolbar="table | bold italic">
+      <script type="text/html"><table style="border-collapse: collapse; width: 100%;"><thead><tr><th>プラン</th><th>料金</th><th>備考</th></tr></thead><tbody><tr><td rowspan="2">ベーシック</td><td>月額 500 円</td><td>個人向け</td></tr><tr><td>年額 5,000 円</td><td>2 か月分お得</td></tr><tr><td>チーム</td><td>月額 2,000 円</td><td>5 人まで</td></tr></tbody></table><p>表の外の段落</p></script>
+    </formulit-editor>
+  </div>
+</div>
+
+<h2 id="embed">埋め込み・コード</h2>
+<ul>
+  <li><strong>メディア</strong>: YouTube・Vimeo・Dailymotion・Spotify・Google マップの URL を iframe で埋め込み。URL を貼り付けるだけでも埋め込まれます。</li>
+  <li><strong>HTML 埋め込み</strong>: HTML の断片をそのまま挿入し、ダブルクリックで編集。</li>
+  <li><strong>コードブロック</strong>: 言語を指定（<code>&lt;code class="language-js"&gt;</code>）。Enter で改行、末尾で 3 回押すと抜ける、Tab でインデント、貼り付けはプレーンテキスト。</li>
+</ul>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>コードブロック内で Enter や Tab を押してみてください。ボタンのような要素はダブルクリックで HTML を編集できます</div>
+  <div class="demo-body">
+    <formulit-editor id="f-embed" toolbar="codeBlock htmlEmbed mediaEmbed | bold">
+      <script type="text/html"><pre><code class="language-javascript">function hello(name) {
+	return `こんにちは、${name}`;
+}</code></pre><p>下は HTML 埋め込みで挿入したボタン（保護されていて、クリックで選択・ダブルクリックで編集）:</p><p><a class="btn-link" href="#" data-protect>詳しく見る</a></p></script>
+    </formulit-editor>
+  </div>
+</div>
+
+<h2 id="typing">入力補助</h2>
+<table>
+  <tr><th>入力</th><th>結果</th><th>入力</th><th>結果</th></tr>
+  <tr><td><code># </code> 〜 <code>###### </code></td><td>見出し 1〜6</td><td><code>**文字**</code></td><td>太字</td></tr>
+  <tr><td><code>- </code> / <code>* </code></td><td>箇条書き</td><td><code>*文字*</code> / <code>_文字_</code></td><td>斜体</td></tr>
+  <tr><td><code>1. </code></td><td>番号付きリスト</td><td><code>`文字`</code></td><td>インラインコード</td></tr>
+  <tr><td><code>[] </code> / <code>[x] </code></td><td>ToDo リスト</td><td><code>~~文字~~</code></td><td>取り消し線</td></tr>
+  <tr><td><code>&gt; </code></td><td>引用</td><td><code>---</code></td><td>水平線</td></tr>
+  <tr><td><code>```js </code></td><td>コードブロック</td><td>行頭で <code>/</code></td><td>コマンドメニュー</td></tr>
+</table>
+<p>入力した記号は 1 回の「元に戻す」で元に戻せます。スラッシュコマンドは文字で絞り込み、矢印キーと Enter で実行します。</p>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>空の行で <kbd>/</kbd> や <kbd>#</kbd> <kbd>空白</kbd> を入力してみてください</div>
+  <div class="demo-body">
+    <formulit-editor id="f-typing" toolbar="undo redo | todoList listStyle | toc pageBreak">
+      <script type="text/html"><p>下の空の行で試してください。</p><p><br></p><ul class="todo-list" style="list-style: none;"><li><input type="checkbox" disabled checked>チェックボックスはクリックで切り替え</li><li><input type="checkbox" disabled>Enter で項目を追加</li></ul></script>
+    </formulit-editor>
+  </div>
+</div>
+
+<h2 id="variables">変数の挿入</h2>
+<p>メールテンプレートや帳票の文面に、差し込み用の変数（<code>{{ product_name }}</code> など）を入れるための機能です。<code>variables</code> を設定すると使えるようになります。</p>
+<ul>
+  <li><strong>ツールバーの「変数」</strong>: 検索欄つきのコンボボックスが開きます。文字を入力して絞り込み、<kbd>↑</kbd><kbd>↓</kbd> と <kbd>Enter</kbd>、またはクリックで挿入します。</li>
+  <li><strong>本文で <code>{{</code> と入力</strong>: キャレットの位置に同じ候補が出ます。続けて入力すると絞り込み、<kbd>Enter</kbd> / <kbd>Tab</kbd> で <code>{{</code>〜入力した文字を変数に置き換えます。<kbd>Esc</kbd> で閉じると、<code>{{</code> はそのまま残ります。全角の <code>｛｛</code> でも開きます。</li>
+  <li><strong>絞り込みの対象</strong>はグループ名・変数名・変数値。空白で区切ると AND 検索になり、大文字小文字・全角半角・ひらがなとカタカナは区別しません（「こーど」で「SKUコード」に一致）。</li>
+  <li>挿入されるのは<strong>ただの文字列</strong>です。出力 HTML に特別な要素や属性は入りません。</li>
+</ul>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>「変数▼」を押すか、本文で <kbd>{</kbd><kbd>{</kbd> と入力してみてください</div>
+  <div class="demo-body">
+    <div class="controls">
+      <label>書式 <select id="f-var-format">
+        <option value="mustache">{{ product_name }}（既定）</option>
+        <option value="dollar">${product_name}</option>
+        <option value="percent">%product_name%</option>
+      </select></label>
+    </div>
+    <formulit-editor id="f-var" toolbar="undo redo | bold italic | variable">
+      <script type="text/html"><p>{{ customer_name }} 様</p><p>このたびは「{{ product_name }}」をご注文いただき、ありがとうございます。</p><p><br></p></script>
+    </formulit-editor>
+    <pre class="out" id="f-var-out"></pre>
+  </div>
+</div>
+<script type="text/plain" class="code" data-lang="js">
+  const editor = document.querySelector('formulit-editor');
+  editor.variables = [
+    { type: 'group', label: '商品', variables: [
+      { label: '商品名', value: 'product_name' },
+      { label: 'SKUコード', value: 'sku' },
+    ] },
+    { type: 'group', label: '顧客', variables: [
+      { label: '氏名', value: 'customer_name' },
+      { label: 'メールアドレス', value: 'email' },
+    ] },
+    { label: '今日の日付', value: 'today' }, // グループに入れない変数も書けます
+  ];
+  // ツールバーに 'variable' を入れる（DEFAULT_TOOLBAR / COMPACT_TOOLBAR には入っています）
+  editor.toolbar = ['bold', 'italic', '|', 'variable'];
+</script>
+<h3>書式を変える</h3>
+<table>
+  <tr><th>プロパティ</th><th>既定値</th><th>説明</th></tr>
+  <tr><td><code>variableFormat</code></td><td><code>{ open: '{{ ', close: ' }}' }</code></td><td>挿入する文字列。<code>{ open, close }</code> か、<code>(variable) =&gt; string</code> の関数</td></tr>
+  <tr><td><code>variableTrigger</code></td><td><code>null</code></td><td>本文で候補を出すきっかけの文字列。<code>null</code> なら <code>variableFormat.open</code> の前後の空白を除いたもの（関数のときは <code>{{</code>）。<code>false</code> で本文からの呼び出しを無効</td></tr>
+</table>
+<script type="text/plain" class="code" data-lang="js">
+  editor.variableFormat = { open: '${', close: '}' };            // ${product_name}、本文では "${" で候補
+  editor.variableFormat = (v) => `[[${v.value.toUpperCase()}]]`; // 関数も可（v は variables に書いたオブジェクト）
+  editor.variableTrigger = '@@';                                 // きっかけを明示
+  editor.insertVariable('sku');                                  // プログラムから挿入
+</script>
+
+<h2 id="productivity">生産性</h2>
+<ul>
+  <li><strong>検索と置換</strong>（Ctrl/⌘+F）: 大文字小文字の区別・単語単位・すべて置換。一致箇所の色付けは本文を変更しません。</li>
+  <li><strong>文字数カウント</strong>（<code>word-count</code>）と上限表示（<code>max-chars</code>）。</li>
+  <li><strong>自動保存</strong>（<code>autosave</code>）: 入力が止まったら保存し、状態をステータスバーに表示。Ctrl/⌘+S で即保存。</li>
+  <li><strong>全画面</strong>、<strong>ショートカット一覧</strong>（Alt+0）、<strong>目次</strong>（見出しから生成し自動更新）、<strong>改ページ</strong>。</li>
+</ul>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>入力すると 1 秒後に「保存」します（この例では保存したふり）。Ctrl/⌘+F で検索できます</div>
+  <div class="demo-body">
+    <formulit-editor id="f-prod" word-count autosave-delay="1000" toolbar="findReplace | bold italic | fullscreen shortcuts">
+      <script type="text/html"><p>formulit は検索と置換、文字数カウント、自動保存に対応しています。formulit の「formulit」を検索してみてください。</p></script>
+    </formulit-editor>
+  </div>
+</div>
+<script type="module" id="f-script">
+  import 'formulit';
+  const prod = document.getElementById('f-prod');
+  prod.autosave = async () => { await new Promise((r) => setTimeout(r, 400)); };
+  document.getElementById('f-format').formatStyles = [{ name: 'リード文', element: 'p', classes: ['lead'] }];
+  const v = document.getElementById('f-var');
+  const vout = document.getElementById('f-var-out');
+  v.variables = [
+    { type: 'group', label: '商品', variables: [{ label: '商品名', value: 'product_name' }, { label: 'SKUコード', value: 'sku' }, { label: '価格', value: 'price' }] },
+    { type: 'group', label: '顧客', variables: [{ label: '氏名', value: 'customer_name' }, { label: 'メールアドレス', value: 'email' }] },
+    { type: 'group', label: '注文', variables: [{ label: '注文番号', value: 'order_id' }, { label: '注文日', value: 'order_date' }] },
+    { label: '今日の日付', value: 'today' },
+  ];
+  const formats = { mustache: null, dollar: { open: '${', close: '}' }, percent: { open: '%', close: '%' } };
+  document.getElementById('f-var-format').onchange = (e) => { v.variableFormat = formats[e.target.value]; v.focusEditor(); };
+  const showVar = () => { vout.textContent = v.value; };
+  v.addEventListener('input', showVar);
+  await customElements.whenDefined('formulit-editor');
+  showVar();
+</script>
+</main>
+</body>
+</html>

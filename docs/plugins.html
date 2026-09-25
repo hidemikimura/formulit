@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>プラグインの作り方 | formulit</title>
+<meta name="description" content="formulit の独自プラグイン（ボタン・セレクト・ドロップダウン・コンテキストツールバー・ショートカット・ステータスバー）の作り方。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<script type="importmap">
+{ "imports": {
+  "lit": "./lib/vendor/lit/index.js", "lit/": "./lib/vendor/lit/",
+  "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
+  "lit-element/": "./lib/vendor/lit-element/",
+  "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
+  "formulit": "./lib/formulit/src/index.js"
+} }
+</script>
+<script type="module" src="assets/site.js"></script>
+</head>
+
+<body>
+<main>
+<h1>プラグインの作り方</h1>
+<p class="lead">組み込み機能もすべてプラグインとして実装されています。<code>registerPlugin()</code> で登録し、項目名を <code>toolbar</code> に書くと表示されます。</p>
+
+<h2 id="demo">ライブデモ</h2>
+<p>下のエディタには、このページのコード（すぐ下に表示）で作った 5 つの独自プラグインが入っています: マーカー（ボタン・ショートカット）、字間（セレクト）、定型文（ドロップダウン）、注意ボックス（コンテキストツールバー）、段落数（ステータスバー）。</p>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>注意ボックスの中にカーソルを置くと、専用のツールバーが出ます</div>
+  <div class="demo-body">
+    <formulit-editor id="pg">
+      <script type="text/html"><p>文字を選んで「M」（または Ctrl/⌘+Shift+H）でマーカーを引けます。「字間」「定型文」も試してください。</p><div class="note"><p>注意ボックスです。ここにカーソルを置いてください。</p></div><p>最後の段落</p></script>
+    </formulit-editor>
+  </div>
+</div>
+<script type="module" id="pg-script">
+  import { registerPlugin } from 'formulit';
+  import { html } from 'lit';
+
+  // 1. ボタン + ショートカット：選択範囲を <mark> で囲む／外す
+  registerPlugin({
+    name: 'mark',
+    items: {
+      mark: {
+        title: 'マーカー (Ctrl/⌘+Shift+H)',
+        icon: html`<b style="background:#ffe58f;padding:0 3px">M</b>`,
+        active: (ed) => ed.isInlineActive({ tag: 'mark' }),
+        action: (ed) => ed.toggleInline({ tag: 'mark' }),
+      },
+    },
+    keymap: { 'Mod-Shift-h': 'mark' },
+  });
+
+  // 2. セレクト：字間を <span style="letter-spacing"> で指定
+  registerPlugin({
+    name: 'letterSpacing',
+    items: {
+      letterSpacing: {
+        type: 'select', title: '字間',
+        options: [{ value: '', label: '字間' }, { value: '0.05em', label: '広め' }, { value: '0.15em', label: 'かなり広め' }],
+        value: (ed) => ed.inlineStyleAt('letter-spacing'),
+        action: (ed, v) => ed.applyInline([{ kind: 'style', prop: 'letter-spacing', value: v || null }]),
+      },
+    },
+  });
+
+  // 3. ドロップダウン：定型文を挿入
+  registerPlugin({
+    name: 'snippets',
+    items: {
+      snippets: {
+        type: 'dropdown', title: '定型文', icon: '定型文',
+        panel: (ed, close) => html`<div class="menu">
+          ${['お世話になっております。', 'よろしくお願いいたします。', '以上、ご確認ください。'].map((t) => html`
+            <button @click=${() => { ed.transact(() => document.execCommand('insertText', false, t)); close(); }}>${t}</button>`)}
+        </div>`,
+      },
+    },
+  });
+
+  // 4. コンテキストツールバー：div.note の中にいるときだけ表示
+  registerPlugin({
+    name: 'noteBox',
+    items: {
+      noteRemove: {
+        title: '注意ボックスを解除', icon: 'ボックスを解除',
+        action: (ed) => ed.transact(() => {
+          const box = ed.closestAtSelection('div.note');
+          box?.replaceWith(...box.childNodes);
+        }),
+      },
+    },
+    contextToolbars: [{ name: 'noteBox', match: (ed) => ed.closestAtSelection('div.note'), items: ['noteRemove'] }],
+  });
+
+  // 5. ステータスバー
+  registerPlugin({
+    name: 'paragraphCount',
+    status: (ed) => html`<span>段落 ${ed.editable.querySelectorAll('p').length}</span>`,
+  });
+
+  const ed = document.getElementById('pg');
+  ed.toolbar = ['undo', 'redo', '|', 'bold', 'italic', 'mark', 'letterSpacing', '|', 'snippets', '|', 'source'];
+</script>
+<script type="text/plain" class="code" data-lang="js" data-from="pg-script"></script>
+<div class="note"><p><strong>登録のタイミング</strong>: <code>registerPlugin()</code> はエディタ要素が DOM に追加される前に呼ぶのが基本です。ツールバー項目は後からでも反映されますが、<code>init()</code> は接続時、<code>prepare()</code> は内容の読み込み時に登録済みのプラグインにだけ適用されます。</p></div>
+
+<h2 id="shape">プラグインの形</h2>
+<script type="text/plain" class="code" data-lang="js">
+  registerPlugin({
+    name: 'my-plugin',                 // 一意な名前（plugins 属性でも使う）
+    items: { itemName: { /* 項目定義 */ } },
+    keymap: { 'Mod-k': 'itemName', Enter: (ed, event) => false },
+    contextToolbars: [{ name: 'x', match: (ed) => ed.closestAtSelection('div.x'), items: ['itemName'] }],
+    status: (ed) => html`…`,           // ステータスバーに表示
+    prepare: (root) => {},             // 内容を読み込むたびに（編集用の調整）
+    init: (ed) => () => {},            // エディタ接続時。戻り値は切断時に呼ばれる
+  });
+</script>
+
+<h2 id="items">項目定義</h2>
+<table>
+  <tr><th>キー</th><th>説明</th></tr>
+  <tr><td><code>type</code></td><td><code>'button'</code>（既定）/ <code>'select'</code> / <code>'dropdown'</code></td></tr>
+  <tr><td><code>icon</code> / <code>title</code></td><td>アイコン（Lit のテンプレートか文字列）とツールチップ</td></tr>
+  <tr><td><code>action(ed, value)</code></td><td>クリック時（select は選んだ値）</td></tr>
+  <tr><td><code>active(ed)</code> / <code>enabled(ed)</code> / <code>visible(ed)</code></td><td>押下状態 / 有効状態 / 表示するか</td></tr>
+  <tr><td><code>toggle</code> / <code>availableInSource</code></td><td>押下状態を持つボタンとして扱う / HTML ソース表示中も使える</td></tr>
+  <tr><td><code>options</code> / <code>value(ed)</code></td><td>select 用。<code>options</code> は <code>[{ value, label }]</code> か関数</td></tr>
+  <tr><td><code>panel(ed, close)</code> / <code>label(ed)</code> / <code>onOpen</code> / <code>onClose</code></td><td>dropdown 用。<code>panel</code> は Lit テンプレートを返す</td></tr>
+</table>
+<div class="warn"><p><code>active</code> などはツールバーを描画するたびに呼ばれます。文書全体の走査など重い処理はしないでください。</p></div>
+
+<h2 id="transact">内容を変更する</h2>
+<p>DOM の変更は<strong>必ず <code>ed.transact(() =&gt; { … })</code> の中で</strong>行います。1 回の「元に戻す」単位になり、<code>input</code> イベント・フォームの値・原文保持の変更検知が正しく働きます。</p>
+<table>
+  <tr><th>API</th><th>用途</th></tr>
+  <tr><td><code>ed.exec(command, value)</code></td><td><code>execCommand</code> を 1 回実行</td></tr>
+  <tr><td><code>ed.insertNodes(node)</code> / <code>ed.insertNodesAtSelection(node)</code></td><td>ノードを挿入（transact 外 / 内から）。ブロックは段落を分割して入る</td></tr>
+  <tr><td><code>ed.insertHTML(html)</code></td><td>HTML 文字列を挿入（サニタイズされる）</td></tr>
+  <tr><td><code>ed.applyInline(ops)</code></td><td><code>[{ kind: 'style', prop, value }]</code> / <code>[{ kind: 'wrap', tag, classes, remove? }]</code>。範囲なしなら次に入力する文字に適用</td></tr>
+  <tr><td><code>ed.toggleInline({ tag, classes })</code> / <code>ed.isInlineActive(…)</code></td><td>要素で囲む書式の切り替え / 状態</td></tr>
+  <tr><td><code>ed.setBlockStyle(prop, value)</code></td><td>選択中の段落などに style（空で解除）</td></tr>
+  <tr><td><code>ed.closestAtSelection(selector)</code> / <code>ed.selectedBlocks()</code> / <code>ed.getRange()</code></td><td>カーソル位置の要素・ブロック・範囲</td></tr>
+</table>
+
+<h2 id="keymap">ショートカット</h2>
+<p>キーは <code>Mod</code>（Mac は ⌘、それ以外は Ctrl）・<code>Alt</code>・<code>Shift</code> と <code>event.key</code>（1 文字は小文字）を <code>-</code> でつなぎます: <code>'Mod-b'</code>、<code>'Mod-Shift-z'</code>、<code>'Alt-0'</code>、<code>'Enter'</code>、<code>'Tab'</code>、<code>'Escape'</code>。</p>
+<p>値が関数のとき <code>false</code> を返すと「処理しなかった」扱いになり、次のプラグインやブラウザ既定の動作に回ります。<strong>Enter や Tab のような条件付きのキーは、該当しないとき必ず <code>false</code> を返してください。</strong>日本語入力の変換中のキーは自動で除外されます。</p>
+
+<h2 id="dialog">ダイアログ</h2>
+<script type="text/plain" class="code" data-lang="js">
+  const v = await ed.openDialog({
+    title: 'ボタンを挿入', submitLabel: '挿入',
+    fields: [
+      { name: 'text', label: '文字', type: 'text', value: '詳しく見る' },
+      { name: 'href', label: 'URL', type: 'url', value: 'https://' },
+      { name: 'color', label: '色', type: 'color', value: '#0b57d0', half: true },
+      { name: 'blank', label: '新しいタブ', type: 'checkbox', half: true },
+    ],
+  });
+  if (v) {
+    const a = document.createElement('a');
+    a.className = 'btn-link';
+    a.href = v.href;
+    a.textContent = v.text;
+    a.style.background = v.color;
+    if (v.blank) a.target = '_blank';
+    ed.insertNodes(a);
+  }
+</script>
+<p><code>type</code>: <code>text</code> / <code>url</code> / <code>number</code> / <code>checkbox</code> / <code>select</code>（<code>options</code>）/ <code>textarea</code> / <code>color</code> / <code>file</code>。閉じると開く前の選択位置に戻ります。</p>
+
+<h2 id="prepare">読み込み時の調整（prepare と setTemp）</h2>
+<p>編集中だけ属性を変えたいときは、<code>prepare</code> の中で <code>setTemp(el, name, value)</code> を使います。書き出し時に値と属性の並び順が元に戻ります。<code>data-formulit-</code> で始まる属性は内部用として出力から自動的に除かれます。</p>
+<script type="text/plain" class="code" data-lang="js">
+  import { registerPlugin, setTemp } from 'formulit';
+
+  registerPlugin({
+    name: 'widgets',
+    prepare(root) {
+      root.querySelectorAll('.widget').forEach((el) => setTemp(el, 'contenteditable', 'false'));
+    },
+  });
+</script>
+
+<h2 id="dont">やってはいけないこと</h2>
+<ul>
+  <li><code>ed.editable.innerHTML = …</code> で書き換える（<code>ed.value = …</code> を使う）</li>
+  <li><code>transact</code> の外で DOM を変える</li>
+  <li><code>active</code> などで文書全体を毎回走査する</li>
+  <li><code>_</code> で始まる内部メソッドに依存する（<code>_withoutFocus</code> を除く）</li>
+</ul>
+</main>
+</body>
+</html>

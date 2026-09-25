@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>設定 | formulit</title>
+<meta name="description" content="formulit の属性・プロパティ、書式の選択肢（フォント・サイズ・色・スタイル）、見た目の調整。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<script type="importmap">
+{ "imports": {
+  "lit": "./lib/vendor/lit/index.js", "lit/": "./lib/vendor/lit/",
+  "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
+  "lit-element/": "./lib/vendor/lit-element/",
+  "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
+  "formulit": "./lib/formulit/src/index.js"
+} }
+</script>
+<script type="module" src="assets/site.js"></script>
+</head>
+
+<body>
+<main>
+<h1>設定</h1>
+<p class="lead">属性（HTML に書く）と、JS プロパティ（配列や関数）で設定します。</p>
+
+<h2 id="try">設定を試す</h2>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>チェックを切り替えると、エディタにそのまま反映されます</div>
+  <div class="demo-body">
+    <div class="controls" id="cf-controls">
+      <label><input type="checkbox" data-prop="readonly"> readonly</label>
+      <label><input type="checkbox" data-prop="wordCount" checked> word-count</label>
+      <label><input type="checkbox" data-prop="maxChars"> max-chars="120"</label>
+      <label><input type="checkbox" data-prop="autoformat" checked> autoformat</label>
+      <label><input type="checkbox" data-prop="preserveSource" checked> preserve-source</label>
+      <label>placeholder <input data-prop="placeholder" value="本文を入力…" style="width:9em"></label>
+      <button class="btn" type="button" id="cf-clear">空にする</button>
+    </div>
+    <formulit-editor id="cf" word-count toolbar="undo redo | format bold italic | ul ol todoList | link | source">
+      <script type="text/html"><p class='x'>設定を切り替えて試してください。行頭で <code>## </code> と入力すると見出しになります（autoformat）。</p></script>
+    </formulit-editor>
+    <pre class="out" id="cf-out"></pre>
+  </div>
+</div>
+<script type="module" id="cf-script">
+  import 'formulit';
+  const ed = document.getElementById('cf');
+  const out = document.getElementById('cf-out');
+  const show = () => { out.textContent = ed.value; };
+  for (const input of document.querySelectorAll('#cf-controls [data-prop]')) {
+    input.addEventListener(input.type === 'checkbox' ? 'change' : 'input', () => {
+      const p = input.dataset.prop;
+      if (p === 'maxChars') ed.maxChars = input.checked ? 120 : 0;
+      else if (input.type === 'checkbox') ed[p] = input.checked;
+      else ed[p] = input.value;
+      show();
+    });
+  }
+  document.getElementById('cf-clear').onclick = () => { ed.value = ''; show(); };
+  ed.placeholder = '本文を入力…';
+  ed.addEventListener('input', show);
+  await customElements.whenDefined('formulit-editor');
+  show();
+</script>
+
+<h2 id="attributes">属性</h2>
+<p>属性で書けるものは、同名（キャメルケース）のプロパティでも設定できます。</p>
+<table>
+  <tr><th>属性</th><th>プロパティ</th><th>既定値</th><th>説明</th></tr>
+  <tr><td><code>name</code></td><td>—</td><td></td><td>フォーム送信時の名前</td></tr>
+  <tr><td><code>value</code></td><td><code>value</code></td><td></td><td>HTML。属性は初期値のみ（ブラウザが整形）。プロパティに設定した文字列は 1 文字も変えずに保持</td></tr>
+  <tr><td><code>placeholder</code></td><td><code>placeholder</code></td><td><code>''</code></td><td>空のときの表示</td></tr>
+  <tr><td><code>readonly</code></td><td><code>readonly</code></td><td><code>false</code></td><td>読み取り専用</td></tr>
+  <tr><td><code>toolbar</code></td><td><code>toolbar</code></td><td><code>DEFAULT_TOOLBAR</code></td><td>項目名を空白区切り。グループはプロパティ（配列）で → <a href="toolbar.html">ツールバー</a></td></tr>
+  <tr><td><code>plugins</code></td><td><code>plugins</code></td><td>すべて</td><td>有効にするプラグイン名（空白区切り）</td></tr>
+  <tr><td><code>sanitize</code></td><td><code>sanitize</code></td><td><code>'strip'</code></td><td><code>strip</code>: script / on* / javascript: を除去。<code>none</code>: 残す（編集中だけ無効化）</td></tr>
+  <tr><td><code>protect</code></td><td><code>protect</code></td><td><code>DEFAULT_PROTECT</code></td><td>編集中に丸ごと保護する要素の CSS セレクタ</td></tr>
+  <tr><td><code>preserve-source</code></td><td><code>preserveSource</code></td><td><code>true</code></td><td>編集後も未変更部分を原文のまま返す。無効は <code>"false"</code></td></tr>
+  <tr><td><code>autoformat</code></td><td><code>autoformat</code></td><td><code>true</code></td><td>Markdown 風の入力変換。無効は <code>"false"</code></td></tr>
+  <tr><td><code>word-count</code></td><td><code>wordCount</code></td><td><code>false</code></td><td>ステータスバーに文字数・単語数</td></tr>
+  <tr><td><code>max-chars</code></td><td><code>maxChars</code></td><td><code>0</code></td><td>文字数の上限表示（超えると赤字。入力は止めない）</td></tr>
+  <tr><td><code>autosave-delay</code></td><td><code>autosaveDelay</code></td><td><code>2000</code></td><td>自動保存までの待ち時間（ms）</td></tr>
+  <tr><td><code>fullscreen</code></td><td><code>fullscreen</code></td><td><code>false</code></td><td>全画面表示</td></tr>
+</table>
+
+<h2 id="properties">JS プロパティ（配列・関数）</h2>
+<table>
+  <tr><th>プロパティ</th><th>形式</th><th>説明</th></tr>
+  <tr><td><code>fontFamilies</code> / <code>fontSizes</code> / <code>lineHeights</code></td><td><code>[{ value, label }]</code></td><td>フォント・文字サイズ・行間の選択肢（<code>value: ''</code> は「指定なし」）</td></tr>
+  <tr><td><code>colors</code></td><td><code>[{ color, label }]</code></td><td>文字色・背景色のパレット</td></tr>
+  <tr><td><code>formatStyles</code></td><td><code>[{ name, element, classes }]</code></td><td>「スタイル」で選べるクラス。未設定ならボタン非表示</td></tr>
+  <tr><td><code>imageUploader</code></td><td><code>async (file) =&gt; url</code></td><td>画像のアップロード先。未設定なら data URL</td></tr>
+  <tr><td><code>imageStyles</code></td><td><code>[{ name, label, style?, classes? }]</code></td><td>画像の配置（inline / alignLeft / alignCenter / alignRight）</td></tr>
+  <tr><td><code>codeBlockLanguages</code></td><td><code>[{ value, label }]</code></td><td>コードブロックの言語</td></tr>
+  <tr><td><code>mediaProviders</code></td><td><code>[{ name, re, src, width, height }]</code></td><td>埋め込みに対応する URL</td></tr>
+  <tr><td><code>autosave</code></td><td><code>async (html, editor) =&gt; {}</code></td><td>自動保存</td></tr>
+  <tr><td><code>slashCommands</code></td><td>配列 / <code>false</code></td><td>スラッシュコマンドの一覧（<code>false</code> で無効）</td></tr>
+  <tr><td><code>variables</code></td><td><code>[{ type: 'group', label, variables: [{ label, value }] }]</code></td><td>挿入できる変数（<a href="features.html#variables">変数の挿入</a>）。未設定なら「変数」ボタン非表示</td></tr>
+  <tr><td><code>variableFormat</code></td><td><code>{ open, close }</code> / <code>(variable) =&gt; string</code></td><td>挿入する文字列の書式（既定 <code>{{ value }}</code>）</td></tr>
+  <tr><td><code>variableTrigger</code></td><td>string / <code>false</code></td><td>本文で変数の候補を出す文字列（既定は <code>variableFormat.open</code>）</td></tr>
+</table>
+
+<h2 id="choices">書式の選択肢を変える</h2>
+<p>フォント・サイズ・色・「スタイル」の選択肢はプロパティで差し替えます。「スタイル」に登録したクラスの見た目は、ページの CSS で定義します（エディタの中にも同じ CSS が効きます）。</p>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>サイズ・色・スタイルを独自の選択肢にしたエディタ</div>
+  <div class="demo-body">
+    <formulit-editor id="ch" toolbar="styles fontSize fontColor bgColor | bold italic">
+      <script type="text/html"><p>文字を選んで、サイズ・色・スタイルを変えてみてください。</p><div><p>段落にカーソルを置いて「注意ボックス」を選ぶと、囲みの div にクラスが付きます。</p></div></script>
+    </formulit-editor>
+    <pre class="out" id="ch-out"></pre>
+  </div>
+</div>
+<script type="module" id="ch-script">
+  import 'formulit';
+  const ed = document.getElementById('ch');
+  ed.fontSizes = [
+    { value: '', label: 'サイズ' },
+    { value: '0.875em', label: '小' },
+    { value: '1.25em', label: '大' },
+    { value: '1.75em', label: '特大' },
+  ];
+  ed.colors = [
+    { color: '#0b57d0', label: 'ブランド' },
+    { color: '#c5221f', label: '警告' },
+    { color: '#1e8e3e', label: '成功' },
+    { color: '#5f6368', label: '補足' },
+    { color: '#fff176', label: 'マーカー黄' },
+  ];
+  ed.formatStyles = [
+    { name: 'リード文', element: 'p', classes: ['lead'] },
+    { name: '注意ボックス', element: 'div', classes: ['note'] },
+    { name: 'マーカー', element: 'span', classes: ['marker'] },
+  ];
+  const out = document.getElementById('ch-out');
+  ed.addEventListener('input', () => { out.textContent = ed.value; });
+</script>
+<script type="text/plain" class="code" data-lang="js" data-from="ch-script"></script>
+
+<h2 id="appearance">見た目の調整</h2>
+<p>エディタの枠・ツールバーは CSS 変数と <code>::part()</code> で、本文の見た目はページの CSS で調整します（編集領域はシャドウ DOM の外にあるので、サイトの本文用 CSS がそのまま効きます）。</p>
+<table>
+  <tr><th>CSS 変数</th><th>既定値</th></tr>
+  <tr><td><code>--formulit-min-height</code></td><td>240px</td></tr>
+  <tr><td><code>--formulit-padding</code></td><td>12px 16px</td></tr>
+  <tr><td><code>--formulit-border</code></td><td>#d0d4d9</td></tr>
+  <tr><td><code>--formulit-radius</code></td><td>6px</td></tr>
+  <tr><td><code>--formulit-bg</code> / <code>--formulit-toolbar-bg</code></td><td>#fff / #f7f8fa</td></tr>
+  <tr><td><code>--formulit-fullscreen-width</code></td><td>860px（全画面時の本文幅）</td></tr>
+</table>
+<p><code>::part()</code>: <code>toolbar</code>、<code>body</code>、<code>source</code>（HTML ソースの textarea）、<code>status</code>（ステータスバー）</p>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>CSS 変数と本文の CSS を変えた例</div>
+  <div class="demo-body">
+    <formulit-editor id="th" class="themed" toolbar="format | bold italic | ul ol | link">
+      <script type="text/html"><h2>見出し</h2><p>本文の行間や見出しの装飾は、ページの CSS で指定します。</p></script>
+    </formulit-editor>
+  </div>
+</div>
+<style id="th-style">
+  formulit-editor.themed {
+    --formulit-min-height: 160px;
+    --formulit-radius: 12px;
+    --formulit-border: #0b57d0;
+    --formulit-toolbar-bg: #eef3fd;
+  }
+  formulit-editor.themed .formulit-editable {
+    font-family: Georgia, "Hiragino Mincho ProN", serif;
+    line-height: 1.9;
+  }
+  formulit-editor.themed .formulit-editable h2 {
+    border-left: 4px solid #0b57d0;
+    padding-left: .5em;
+  }
+</style>
+<script type="text/plain" class="code" data-lang="css" data-from="th-style"></script>
+</main>
+</body>
+</html>

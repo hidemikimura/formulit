@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HTML 保持の仕組み | formulit</title>
+<meta name="description" content="formulit が手書き HTML を欠落させない仕組み（部分的な原文保持）と、出力が変わるケース。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<script type="importmap">
+{ "imports": {
+  "lit": "./lib/vendor/lit/index.js", "lit/": "./lib/vendor/lit/",
+  "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
+  "lit-element/": "./lib/vendor/lit-element/",
+  "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
+  "formulit": "./lib/formulit/src/index.js"
+} }
+</script>
+<script type="module" src="assets/site.js"></script>
+</head>
+
+<body>
+<main>
+<h1>HTML 保持の仕組み</h1>
+<p class="lead">多くのエディタは HTML を内部モデルに変換するため、モデルで表せないタグや属性が消えます。formulit は DOM をそのまま編集し、さらに「原文のどこがどのノードになったか」を覚えておくことで、編集していない部分を元の文字列のまま返します。</p>
+
+<h2 id="compare">比べてみる</h2>
+<p>左に HTML を書いて「読み込む」を押し、エディタで一部を編集してください。<strong>formulit の value</strong> と、比較用の <strong>ブラウザ標準の書き出し</strong>（<code>innerHTML</code> 相当）を並べて表示します。原文と違う行は色が付きます。</p>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>原文との差分を行単位で表示します</div>
+  <div class="demo-body">
+    <div class="cols">
+      <div>
+        <h4>原文（読み込む HTML）</h4>
+        <textarea class="src" id="hp-src" spellcheck="false"></textarea>
+        <div class="controls" style="margin:8px 0 0"><button class="btn primary" type="button" id="hp-load">読み込む</button><span id="hp-state" style="font-size:12px;color:#59636e"></span></div>
+      </div>
+      <div>
+        <h4>エディタ</h4>
+        <formulit-editor id="hp" toolbar="undo redo | format bold italic link | ul ol | source" style="--formulit-min-height:150px">
+          <script type="text/html"><p>読み込み中…</p></script>
+        </formulit-editor>
+      </div>
+    </div>
+    <div class="cols" style="margin-top:12px">
+      <div><h4>formulit の value</h4><pre class="out diff" id="hp-out"></pre></div>
+      <div><h4>ブラウザ標準の書き出し（比較用）</h4><pre class="out diff" id="hp-plain"></pre></div>
+    </div>
+  </div>
+</div>
+<script type="module" id="hp-script">
+  import { serialize } from 'formulit';
+  const ed = document.getElementById('hp');
+  const src = document.getElementById('hp-src');
+  src.value = `<h2 class='title' data-id=42>お知らせ</h2>
+<P CLASS=lead>営業時間を変更します &copy; 2026</P>
+<!-- 担当: 広報 -->
+<ul>
+  <li>平日 9:00〜18:00
+  <li>土日祝 休み
+</ul>
+<p>詳しくは <a href=/info target=_blank>こちら</a>。<i class="icon-arrow"></i></p>`;
+
+  // 行単位の差分（原文にない行に色を付ける）
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const diff = (base, text) => {
+    const a = base.split('\n');
+    const b = text.split('\n');
+    const dp = Array.from({ length: a.length + 1 }, () => new Array(b.length + 1).fill(0));
+    for (let i = a.length - 1; i >= 0; i--) {
+      for (let j = b.length - 1; j >= 0; j--) {
+        dp[i][j] = a[i] === b[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+      }
+    }
+    const same = new Set();
+    for (let i = 0, j = 0; i < a.length && j < b.length;) {
+      if (a[i] === b[j]) { same.add(j); i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) i++; else j++;
+    }
+    return b.map((line, j) => `<span class="${same.has(j) ? 'same' : 'chg'}">${esc(line) || ' '}</span>`).join('\n');
+  };
+  const show = () => {
+    document.getElementById('hp-out').innerHTML = diff(src.value, ed.value);
+    document.getElementById('hp-plain').innerHTML = diff(src.value, serialize(ed.editable));
+    document.getElementById('hp-state').textContent = ed.dirty ? '編集済み' : '未編集（value は原文そのもの）';
+  };
+  document.getElementById('hp-load').onclick = () => { ed.value = src.value; show(); };
+  let t;
+  ed.addEventListener('input', () => { clearTimeout(t); t = setTimeout(show, 120); });
+  await customElements.whenDefined('formulit-editor');
+  ed.value = src.value;
+  show();
+</script>
+
+<h2 id="guarantee">保証されること</h2>
+<ol>
+  <li><strong>未編集なら原文そのまま</strong> — <code>value</code> を設定して何も編集していなければ、1 文字も変えずに同じ文字列を返します（引用符・大文字・空白・<code>&lt;br/&gt;</code>・<code>&amp;copy;</code> の書き方まで）。ソース表示で編集した HTML も同様です。</li>
+  <li><strong>編集後も未変更部分は原文そのまま</strong> — 読み込み時に原文とノードを対応づけ、変更を追跡します。
+    <table>
+      <tr><th>ノードの状態</th><th>書き出し方</th></tr>
+      <tr><td>変更なし</td><td>原文の文字列そのまま（省略された終了タグも元のまま）</td></tr>
+      <tr><td>中身だけ変更</td><td>原文の開始タグ・終了タグ + 中身を同じ規則で処理</td></tr>
+      <tr><td>属性を変更・新しく追加</td><td>ブラウザのシリアライズ</td></tr>
+    </table>
+  </li>
+  <li><strong>出力は常に編集結果と一致</strong> — つなぎ目で意味が変わるおそれがあるとき（終了タグを省略した <code>&lt;p&gt;x</code> の直後に別の内容が来た等）は、組み立てた HTML を再パースして DOM と等価か確かめ、等価でなければ文書全体をブラウザの書き出しで返します。</li>
+  <li><strong>DOM にあるものは消さない</strong> — class・style・data-*・独自要素・空要素・コメント・<code>details</code>・iframe・<code>&lt;style&gt;</code> など。エディタが編集用に付けた属性（<code>contenteditable</code> 等）は、出力時に元の値と並び順に戻ります。</li>
+</ol>
+
+<h2 id="changes">出力が変わるケース</h2>
+<table>
+  <tr><th>ケース</th><th>理由</th></tr>
+  <tr><td>初期値を <code>&lt;template&gt;</code> や <code>value</code> 属性で渡すと、書き方が整形される</td><td>ブラウザが先にパースするため。原文そのままにするなら <code>value</code> プロパティか <code>&lt;script type="text/html"&gt;</code></td></tr>
+  <tr><td><code>&lt;script&gt;</code>・<code>on*</code> 属性・<code>javascript:</code> URL が消える</td><td>既定の <code>sanitize="strip"</code>。残すなら <code>sanitize="none"</code>（信頼できる利用者向け）</td></tr>
+  <tr><td>除去が起きた文書は、未編集でも <code>dirty</code> が <code>true</code></td><td>危険な記述を「原文そのまま」で素通しさせないため</td></tr>
+  <tr><td>不正な入れ子（<code>&lt;p&gt;</code> の中の <code>&lt;div&gt;</code> など）が直る</td><td>ブラウザのパーサーが読み込み時に直すため</td></tr>
+  <tr><td>属性を変えた要素は <code>"</code> 囲みなどブラウザの書き方になる</td><td>その要素だけ作り直すため</td></tr>
+  <tr><td>末尾に画像・表などを挿入すると後ろに <code>&lt;p&gt;&lt;br&gt;&lt;/p&gt;</code> が入る</td><td>続けて入力できるようにするため</td></tr>
+  <tr><td>他のページからコピーした要素の <code>style</code> が消える（Chrome / Safari）</td><td>コピー時にブラウザが書き込む計算済みスタイルを除去するため。手書き HTML はソース表示に貼り付ける</td></tr>
+  <tr><td>アップロード中の画像の <code>src</code> が <code>blob:</code></td><td>完了後に本来の URL へ差し替わる</td></tr>
+</table>
+
+<h2 id="protect">編集させたくない要素</h2>
+<p><code>protect</code> 属性の CSS セレクタに一致する要素は、編集中 <code>contenteditable=false</code> になり、丸ごと選択・削除だけができます（出力には付きません）。既定は iframe・video・form・svg・メディア埋め込み・<code>[data-protect]</code> など。読み込み直した後も保護したい HTML には <code>data-protect</code> を付けてください。</p>
+
+<h2 id="perf">性能</h2>
+<p>約 200KB・2 万ノードの文書で、読み込み時の対応づけに約 0.1 秒。入力中のエディタ側の処理は約 300 段落の文書で 1 文字あたり約 1ms です。連続入力中はツールバーの表示更新をまとめて行い、書き出しはつなぎ目に不安がない限り再パースを省きます。</p>
+</main>
+</body>
+</html>

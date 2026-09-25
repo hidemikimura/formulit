@@ -1,0 +1,56 @@
+# ドキュメントサイト（docs/）を GitHub Pages に公開する
+# main への push（または Actions 画面の「Run workflow」）で、docs/lib・docs/skills・スキルの zip を生成し、
+# 全ページの表示確認をしてから公開する。生成物はリポジトリにコミットしない。
+name: Deploy docs to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install --no-audit --no-fund; fi
+
+      - name: Build docs (docs/lib, docs/skills, formulit-skill.zip)
+        run: npm run docs:build
+
+      - name: Check all pages in Chromium
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:docs
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

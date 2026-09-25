@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>formulit デモ</title>
+  <!-- npm install 済みのローカル lit を使う。CDN を使う場合は README 参照 -->
+  <script type="importmap">
+  {
+    "imports": {
+      "lit": "../node_modules/lit/index.js",
+      "lit/": "../node_modules/lit/",
+      "lit-html": "../node_modules/lit-html/lit-html.js",
+      "lit-html/": "../node_modules/lit-html/",
+      "lit-element/": "../node_modules/lit-element/",
+      "@lit/reactive-element": "../node_modules/@lit/reactive-element/reactive-element.js",
+      "@lit/reactive-element/": "../node_modules/@lit/reactive-element/"
+    }
+  }
+  </script>
+  <style>
+    body { font-family: system-ui, -apple-system, "Hiragino Sans", sans-serif; margin: 0; background: #f3f4f6; color: #1f2328; }
+    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+    h1 { font-size: 22px; margin: 0 0 4px; }
+    p.lead { margin: 0 0 20px; color: #57606a; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 960px) { .grid { grid-template-columns: 3fr 2fr; } }
+    pre#out { margin: 0; background: #fff; border: 1px solid #d0d4d9; border-radius: 6px; padding: 12px;
+      font-size: 12px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; max-height: 540px; overflow: auto; }
+    .status { font-size: 13px; margin: 8px 0; }
+    .ok { color: #1a7f37; } .ng { color: #cf222e; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    .row button { padding: 6px 12px; border: 1px solid #d0d4d9; background: #fff; border-radius: 6px; cursor: pointer; }
+    /* 本文用のサイトのスタイルがそのまま編集領域にも効く */
+    formulit-editor .note { background: #fff8c5; border-left: 4px solid #d4a72c; padding: 8px 12px; }
+    formulit-editor mark { background: #ffe58f; }
+    formulit-editor .lead { font-size: 1.15em; color: #444; }
+    formulit-editor .marker { background: linear-gradient(transparent 60%, #fff176 60%); }
+    formulit-editor kbd { border: 1px solid #ccc; border-bottom-width: 2px; border-radius: 3px; padding: 0 4px; font-size: .9em; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>formulit</h1>
+  <p class="lead">Lit 製 WYSIWYG エディタのプロトタイプ。手書き HTML（class・data-*・独自要素・コメント・iframe 等）を欠落させずに編集できます。</p>
+
+  <form id="form">
+    <div class="grid">
+      <div>
+        <formulit-editor id="ed" name="body" placeholder="ここに入力…">
+          <template>
+<h2 class="title" data-id="42">手書き HTML の保持テスト</h2>
+<p>これは<strong>太字</strong>と<em>斜体</em>、<span style="color:#c00" data-tooltip="赤字">独自スタイルの span</span>、<i class="icon icon-star"></i>（空の要素）を含む段落です。</p>
+<!-- CMS 用のコメントも残ります -->
+<div class="note" data-type="info"><p>class 付きの <code>div</code> ブロック。Quill ではここが <code>p</code> に変換されてしまいます。</p></div>
+<my-badge level="3">独自要素</my-badge>
+<p><a href="https://example.com" target="_blank" rel="noopener" class="btn" data-track="cta">属性付きリンク</a></p>
+<details><summary>折りたたみ</summary><p>details / summary も保持</p></details>
+<table class="spec"><thead><tr><th>項目</th><th>値</th></tr></thead><tbody><tr><td colspan="2">colspan 付きセル</td></tr></tbody></table>
+<iframe width="320" height="180" src="about:blank" title="埋め込み" style="border:1px solid #ccc"></iframe>
+<script>alert('script は除去されます')</script>
+<p onclick="alert(1)">onclick 属性は除去されます</p>
+          </template>
+        </formulit-editor>
+        <div class="row">
+          <button type="button" id="load">別の HTML を読み込む</button>
+          <button type="button" id="compact">ツールバー：まとめ表示に切替</button>
+          <button type="submit">フォーム送信（FormData を表示）</button>
+          <button type="reset">リセット</button>
+        </div>
+      </div>
+      <div>
+        <strong>value（リアルタイム）</strong>
+        <div class="status" id="status"></div>
+        <pre id="out"></pre>
+      </div>
+    </div>
+  </form>
+</main>
+
+<script type="module">
+  import { registerPlugin, DEFAULT_TOOLBAR, COMPACT_TOOLBAR } from '../src/index.js';
+  import { html } from 'lit';
+
+  // ---- 独自プラグインの例：選択範囲を <mark> で囲む ----
+  registerPlugin({
+    name: 'mark',
+    items: {
+      mark: {
+        title: 'マーカー (Ctrl/⌘+Shift+H)',
+        icon: html`<span style="background:#ffe58f;padding:0 3px">M</span>`,
+        active: (ed) => !!ed.closestAtSelection('mark'),
+        action: (ed) => ed.transact(() => {
+          const existing = ed.closestAtSelection('mark');
+          if (existing) return existing.replaceWith(...existing.childNodes);
+          const range = ed.getRange(true);
+          if (range.collapsed) return;
+          const mark = document.createElement('mark');
+          mark.append(range.extractContents());
+          range.insertNode(mark);
+          const r = document.createRange();
+          r.selectNodeContents(mark);
+          ed.selectRange(r);
+        }),
+      },
+    },
+    keymap: { 'Mod-Shift-h': 'mark' },
+  });
+
+  const ed = document.getElementById('ed');
+  const out = document.getElementById('out');
+  const status = document.getElementById('status');
+  await customElements.whenDefined('formulit-editor');
+  // 既定ツールバーの「下付き」の後ろにマーカーボタンを追加
+  const i = DEFAULT_TOOLBAR.indexOf('sub') + 1;
+  ed.toolbar = [...DEFAULT_TOOLBAR.slice(0, i), 'mark', ...DEFAULT_TOOLBAR.slice(i)];
+  // 文字数の表示と、自動保存のデモ（実際には API へ送信するなど）
+  ed.wordCount = true;
+  ed.autosave = async (html) => { await new Promise((r) => setTimeout(r, 300)); console.log('autosave', html.length, 'chars'); };
+  // 「スタイル」で選べるクラス（CSS はページ側で定義）
+  // 変数の挿入（ツールバーの「変数」、本文で {{ と入力）
+  ed.variables = [
+    { type: 'group', label: '商品', variables: [{ label: '商品名', value: 'product_name' }, { label: 'SKUコード', value: 'sku' }] },
+    { type: 'group', label: '顧客', variables: [{ label: '氏名', value: 'customer_name' }, { label: 'メールアドレス', value: 'email' }] },
+    { label: '今日の日付', value: 'today' },
+  ];
+  ed.formatStyles = [
+    { name: 'リード文', element: 'p', classes: ['lead'] },
+    { name: 'お知らせボックス', element: 'div', classes: ['note'] },
+    { name: 'マーカー（黄）', element: 'span', classes: ['marker'] },
+    { name: 'キーボード', element: 'kbd', classes: [] },
+  ];
+
+  const original = ed.value;
+  const show = () => {
+    out.textContent = ed.value;
+    status.innerHTML = ed.dirty
+      ? '<span class="ng">● 編集済み：変更した部分だけ書き直し、他は原文のまま</span>'
+      : '<span class="ok">● 未編集：読み込んだ文字列をそのまま返しています</span>';
+  };
+  // 右側の表示は入力のたびではなく、少しまとめて更新する（大きな文書での入力を軽く保つため）
+  let showTimer;
+  ed.addEventListener('input', () => { clearTimeout(showTimer); showTimer = setTimeout(show, 150); });
+  ed.addEventListener('formulit-mode', show);
+  show();
+
+  // ツールバーのグループ表示（COMPACT_TOOLBAR はグループでまとめたプリセット）
+  const fullToolbar = ed.toolbar;
+  document.getElementById('compact').onclick = (e) => {
+    const compact = ed.toolbar === fullToolbar;
+    ed.toolbar = compact ? COMPACT_TOOLBAR : fullToolbar;
+    e.target.textContent = compact ? 'ツールバー：すべて表示に切替' : 'ツールバー：まとめ表示に切替';
+  };
+  document.getElementById('load').onclick = () => {
+    ed.value = '<section class="hero" data-bg="blue"><h1>読み込み直し</h1><p>value プロパティで HTML を設定</p></section>';
+    show();
+  };
+  const form = document.getElementById('form');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    out.textContent = 'FormData body =\n' + new FormData(form).get('body');
+  });
+  form.addEventListener('reset', () => setTimeout(show));
+  window.ed = ed;
+</script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>プレイグラウンド | formulit</title>
+<meta name="description" content="formulit のすべての機能を試せるプレイグラウンド。設定を切り替えながら出力 HTML を確認できます。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<script type="importmap">
+{ "imports": {
+  "lit": "./lib/vendor/lit/index.js", "lit/": "./lib/vendor/lit/",
+  "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
+  "lit-element/": "./lib/vendor/lit-element/",
+  "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
+  "formulit": "./lib/formulit/src/index.js"
+} }
+</script>
+<script type="module" src="assets/site.js"></script>
+</head>
+
+<body>
+<main>
+<h1>プレイグラウンド</h1>
+<p class="lead">すべての機能を有効にしたエディタです。設定を切り替えながら、出力される HTML を確認できます。</p>
+
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b><span id="pl-state"></span></div>
+  <div class="demo-body">
+    <div class="controls">
+      <label>ツールバー <select id="pl-toolbar"><option value="default">すべて表示（DEFAULT_TOOLBAR）</option><option value="compact">まとめ表示（COMPACT_TOOLBAR）</option></select></label>
+      <label><input type="checkbox" id="pl-wc" checked> 文字数</label>
+      <label><input type="checkbox" id="pl-ro"> 読み取り専用</label>
+      <label><input type="checkbox" id="pl-save" checked> 自動保存（保存したふり）</label>
+      <button class="btn" type="button" id="pl-sample">サンプルを読み込む</button>
+      <button class="btn" type="button" id="pl-clear">空にする</button>
+      <button class="btn" type="button" id="pl-copy">value をコピー</button>
+    </div>
+    <formulit-editor id="pl" word-count style="--formulit-min-height:360px">
+      <script type="text/html"><p>読み込み中…</p></script>
+    </formulit-editor>
+    <pre class="out" id="pl-out" style="max-height:420px"></pre>
+  </div>
+</div>
+<script type="module" id="pl-script">
+  import { DEFAULT_TOOLBAR, COMPACT_TOOLBAR } from 'formulit';
+  const ed = document.getElementById('pl');
+  const out = document.getElementById('pl-out');
+  const img = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='180'%3E%3Crect width='320' height='180' fill='%239ecbff'/%3E%3Ccircle cx='80' cy='60' r='26' fill='%23fff'/%3E%3Cpath d='M0 180 110 90 190 150 250 110 320 160 320 180Z' fill='%235b9bd5'/%3E%3C/svg%3E";
+  const sample = `<h2 class='title'>プレイグラウンド</h2>
+<p class=lead>formulit のすべての機能を試せます。行頭で <code>/</code> を入力するとコマンドメニューが開きます。</p>
+<!-- コメントもそのまま残ります -->
+<figure class="image" style="float: right; margin: 0 0 1em 1.5em;"><img src="${img}" alt="イラスト" width="200"><figcaption>クリックで配置・キャプション</figcaption></figure>
+<p>画像をクリックすると専用のツールバーが出ます。<b>太字</b>・<i>斜体</i>・<span style="color: rgb(230, 76, 76);">色</span>・<mark>マーカー</mark> などの書式が使えます。</p>
+<ul class="todo-list" style="list-style: none;"><li><input type="checkbox" disabled checked>ToDo リスト</li><li><input type="checkbox" disabled>クリックで完了</li></ul>
+<table style="border-collapse: collapse; clear: both;"><thead><tr><th>項目</th><th>値</th></tr></thead><tbody><tr><td rowspan="2">結合セル</td><td>1</td></tr><tr><td>2</td></tr></tbody></table>
+<pre><code class="language-javascript">const editor = document.querySelector('formulit-editor');
+console.log(editor.value);</code></pre>`;
+  ed.formatStyles = [
+    { name: 'リード文', element: 'p', classes: ['lead'] },
+    { name: '注意ボックス', element: 'div', classes: ['note'] },
+    { name: 'マーカー', element: 'span', classes: ['marker'] },
+  ];
+  ed.variables = [
+    { type: 'group', label: '商品', variables: [{ label: '商品名', value: 'product_name' }, { label: 'SKUコード', value: 'sku' }] },
+    { type: 'group', label: '顧客', variables: [{ label: '氏名', value: 'customer_name' }, { label: 'メールアドレス', value: 'email' }] },
+    { label: '今日の日付', value: 'today' },
+  ];
+  const fakeSave = async () => { await new Promise((r) => setTimeout(r, 300)); };
+  ed.autosave = fakeSave;
+  let t;
+  const show = () => {
+    out.textContent = ed.value;
+    document.getElementById('pl-state').textContent = ed.dirty ? '編集済み：変更した部分だけ書き直し、他は原文のまま' : '未編集：読み込んだ文字列をそのまま返しています';
+  };
+  ed.addEventListener('input', () => { clearTimeout(t); t = setTimeout(show, 150); });
+  document.getElementById('pl-toolbar').onchange = (e) => { ed.toolbar = e.target.value === 'compact' ? COMPACT_TOOLBAR : DEFAULT_TOOLBAR; };
+  document.getElementById('pl-wc').onchange = (e) => { ed.wordCount = e.target.checked; };
+  document.getElementById('pl-ro').onchange = (e) => { ed.readonly = e.target.checked; };
+  document.getElementById('pl-save').onchange = (e) => { ed.autosave = e.target.checked ? fakeSave : null; };
+  document.getElementById('pl-sample').onclick = () => { ed.value = sample; show(); };
+  document.getElementById('pl-clear').onclick = () => { ed.value = ''; show(); };
+  document.getElementById('pl-copy').onclick = async (e) => {
+    try { await navigator.clipboard.writeText(ed.value); e.target.textContent = 'コピーしました'; } catch { e.target.textContent = 'コピーできません'; }
+    setTimeout(() => { e.target.textContent = 'value をコピー'; }, 1500);
+  };
+  await customElements.whenDefined('formulit-editor');
+  ed.value = sample;
+  show();
+</script>
+
+<h2 id="tips">試してほしい操作</h2>
+<ul>
+  <li>空の行で <kbd>/</kbd> → 「表」「画像」などを選ぶ（文字で絞り込めます）</li>
+  <li>行頭で <kbd>#</kbd><kbd>空白</kbd>、<kbd>-</kbd><kbd>空白</kbd>、<kbd>[</kbd><kbd>]</kbd><kbd>空白</kbd></li>
+  <li>表のセルをドラッグで複数選んで結合、画像をクリックして配置・キャプション・リサイズ</li>
+  <li><kbd>Ctrl/⌘</kbd>+<kbd>F</kbd> で検索と置換、<kbd>Alt</kbd>+<kbd>0</kbd> でショートカット一覧</li>
+  <li>本文で <kbd>{</kbd><kbd>{</kbd> と入力、またはツールバーの「変数」から差し込み変数を挿入（「商品」「sku」「こーど」などで絞り込み）</li>
+  <li>「&lt;/&gt;」でソース表示にして HTML を直接編集 → 戻すとその文字列がそのまま value になります</li>
+</ul>
+</main>
+</body>
+</html>

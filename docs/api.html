@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API リファレンス | formulit</title>
+<meta name="description" content="formulit の属性・プロパティ・メソッド・イベント・CSS 変数・part・export の一覧。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<script type="importmap">
+{ "imports": {
+  "lit": "./lib/vendor/lit/index.js", "lit/": "./lib/vendor/lit/",
+  "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
+  "lit-element/": "./lib/vendor/lit-element/",
+  "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
+  "formulit": "./lib/formulit/src/index.js"
+} }
+</script>
+<script type="module" src="assets/site.js"></script>
+</head>
+
+<body>
+<main>
+<h1>API リファレンス</h1>
+<p class="lead"><code>&lt;formulit-editor&gt;</code>（クラス <code>FormulitEditor</code>）の一覧です。</p>
+
+<h2 id="props">属性とプロパティ</h2>
+<table>
+  <tr><th>属性</th><th>プロパティ</th><th>型 / 既定値</th><th>説明</th></tr>
+  <tr><td><code>name</code></td><td>—</td><td>string</td><td>フォーム送信時の名前</td></tr>
+  <tr><td><code>value</code></td><td><code>value</code></td><td>string</td><td>HTML。プロパティに設定した文字列は 1 文字も変えずに保持</td></tr>
+  <tr><td><code>placeholder</code></td><td><code>placeholder</code></td><td><code>''</code></td><td>空のときの表示</td></tr>
+  <tr><td><code>readonly</code></td><td><code>readonly</code></td><td><code>false</code></td><td>読み取り専用</td></tr>
+  <tr><td><code>toolbar</code></td><td><code>toolbar</code></td><td>array / <code>null</code></td><td>ツールバー（<a href="toolbar.html">詳細</a>）</td></tr>
+  <tr><td><code>plugins</code></td><td><code>plugins</code></td><td>array / <code>null</code></td><td>有効にするプラグイン名</td></tr>
+  <tr><td><code>sanitize</code></td><td><code>sanitize</code></td><td><code>'strip'</code></td><td><code>'strip'</code> / <code>'none'</code></td></tr>
+  <tr><td><code>protect</code></td><td><code>protect</code></td><td><code>DEFAULT_PROTECT</code></td><td>保護する要素の CSS セレクタ</td></tr>
+  <tr><td><code>preserve-source</code></td><td><code>preserveSource</code></td><td><code>true</code></td><td>部分的な原文保持</td></tr>
+  <tr><td><code>autoformat</code></td><td><code>autoformat</code></td><td><code>true</code></td><td>Markdown 風の入力変換</td></tr>
+  <tr><td><code>word-count</code></td><td><code>wordCount</code></td><td><code>false</code></td><td>文字数・単語数の表示</td></tr>
+  <tr><td><code>max-chars</code></td><td><code>maxChars</code></td><td><code>0</code></td><td>文字数の上限表示</td></tr>
+  <tr><td><code>autosave-delay</code></td><td><code>autosaveDelay</code></td><td><code>2000</code></td><td>自動保存の待ち時間（ms）</td></tr>
+  <tr><td><code>fullscreen</code></td><td><code>fullscreen</code></td><td><code>false</code></td><td>全画面表示</td></tr>
+  <tr><td>—</td><td><code>fontFamilies</code> / <code>fontSizes</code> / <code>lineHeights</code></td><td><code>[{ value, label }]</code></td><td>選択肢</td></tr>
+  <tr><td>—</td><td><code>colors</code></td><td><code>[{ color, label }]</code></td><td>色のパレット</td></tr>
+  <tr><td>—</td><td><code>formatStyles</code></td><td><code>[{ name, element, classes }]</code></td><td>「スタイル」</td></tr>
+  <tr><td>—</td><td><code>imageUploader</code></td><td><code>async (file) =&gt; url</code></td><td>画像のアップロード先</td></tr>
+  <tr><td>—</td><td><code>imageStyles</code></td><td><code>[{ name, label, style?, classes? }]</code></td><td>画像の配置</td></tr>
+  <tr><td>—</td><td><code>codeBlockLanguages</code></td><td><code>[{ value, label }]</code></td><td>コードブロックの言語</td></tr>
+  <tr><td>—</td><td><code>mediaProviders</code></td><td><code>[{ name, re, src, width, height }]</code></td><td>埋め込み対応 URL</td></tr>
+  <tr><td>—</td><td><code>autosave</code></td><td><code>async (html, ed) =&gt; {}</code></td><td>自動保存</td></tr>
+  <tr><td>—</td><td><code>slashCommands</code></td><td>array / <code>false</code></td><td>スラッシュコマンド</td></tr>
+  <tr><td>—</td><td><code>variables</code></td><td><code>[{ type: 'group', label, variables: [{ label, value }] }]</code></td><td>挿入できる変数</td></tr>
+  <tr><td>—</td><td><code>variableFormat</code></td><td><code>{ open, close }</code> / 関数 / <code>null</code></td><td>変数の書式（既定 <code>{ open: '{{ ', close: ' }}' }</code>）</td></tr>
+  <tr><td>—</td><td><code>variableTrigger</code></td><td>string / <code>false</code> / <code>null</code></td><td>本文で変数の候補を出す文字列</td></tr>
+</table>
+<p>読み取り専用: <code>dirty</code>（編集されたか）、<code>mode</code>（<code>'wysiwyg'</code> / <code>'source'</code>）、<code>editable</code>（編集領域の要素）、<code>items</code>（有効な項目）、<code>selectedObject</code>（選択中の画像・埋め込み）、<code>history</code>。</p>
+
+<h2 id="methods">メソッド</h2>
+<h3>利用側でよく使うもの</h3>
+<table>
+  <tr><th>メソッド</th><th>説明</th></tr>
+  <tr><td><code>getHTML()</code> / <code>setHTML(html)</code></td><td><code>value</code> と同じ</td></tr>
+  <tr><td><code>focusEditor()</code></td><td>編集領域にフォーカス（最後の選択位置を復元）</td></tr>
+  <tr><td><code>undo()</code> / <code>redo()</code></td><td>元に戻す / やり直し</td></tr>
+  <tr><td><code>toggleSource(force?)</code> / <code>toggleFullscreen(force?)</code></td><td>ソース表示 / 全画面の切り替え</td></tr>
+  <tr><td><code>insertHTML(html)</code></td><td>カーソル位置に HTML を挿入（サニタイズされる）</td></tr>
+  <tr><td><code>saveNow()</code></td><td>自動保存を今すぐ実行</td></tr>
+  <tr><td><code>getStats()</code></td><td><code>{ chars, charsNoSpace, words }</code></td></tr>
+  <tr><td><code>insertVariable(valueOrVariable)</code></td><td>カーソル位置に変数を挿入（<code>'sku'</code> または <code>{ label, value }</code>）</td></tr>
+  <tr><td><code>openDropdownItem(name)</code></td><td>ドロップダウン項目を開く（グループ内ならグループごと）</td></tr>
+</table>
+<h3>プラグイン作成用</h3>
+<table>
+  <tr><th>メソッド</th><th>説明</th></tr>
+  <tr><td><code>transact(fn)</code></td><td>DOM 変更を 1 つの履歴にまとめる</td></tr>
+  <tr><td><code>exec(command, value?)</code> / <code>queryState(command)</code></td><td><code>execCommand</code> の実行 / 状態</td></tr>
+  <tr><td><code>insertNodes(node)</code> / <code>insertNodesAtSelection(node)</code></td><td>ノードの挿入（transact 外 / 内）</td></tr>
+  <tr><td><code>getRange(fallbackToEnd?)</code> / <code>selectRange(range)</code></td><td>選択範囲の取得・設定</td></tr>
+  <tr><td><code>setCaretAt(node, offset)</code> / <code>setCaretAfter(node)</code></td><td>カーソルの設定</td></tr>
+  <tr><td><code>closestAtSelection(selector)</code> / <code>selectedBlocks()</code></td><td>カーソル位置の要素 / 選択中のブロック</td></tr>
+  <tr><td><code>applyInline(ops)</code> / <code>toggleInline(op)</code> / <code>isInlineActive(op)</code></td><td>インライン書式</td></tr>
+  <tr><td><code>inlineStyleAt(prop)</code> / <code>setBlockStyle(prop, value)</code></td><td>インラインスタイルの値 / ブロックの style</td></tr>
+  <tr><td><code>openDialog(options)</code></td><td>入力ダイアログ（<code>Promise&lt;値 | null&gt;</code>）</td></tr>
+  <tr><td><code>showPopup({ render, rect })</code> / <code>hidePopup()</code></td><td>キャレット付近のポップアップ</td></tr>
+  <tr><td><code>setHighlight(key, ranges, css)</code></td><td>本文を変えずに範囲を強調</td></tr>
+  <tr><td><code>closeDropdown()</code> / <code>loadOptions()</code></td><td>ドロップダウンを閉じる / <code>load()</code> 用オプション</td></tr>
+</table>
+
+<h2 id="events">イベント</h2>
+<p>すべてホスト要素（<code>&lt;formulit-editor&gt;</code>）から発生し、bubbles・composed です。</p>
+<table>
+  <tr><th>イベント</th><th>タイミング</th><th>detail</th></tr>
+  <tr><td><code>input</code></td><td>内容が変わるたび</td><td>—</td></tr>
+  <tr><td><code>change</code></td><td>フォーカスが外れたとき（変更があれば）</td><td>—</td></tr>
+  <tr><td><code>formulit-mode</code></td><td>ソース表示の切り替え</td><td><code>{ mode }</code></td></tr>
+  <tr><td><code>formulit-fullscreen</code></td><td>全画面の切り替え</td><td><code>{ fullscreen }</code></td></tr>
+  <tr><td><code>formulit-upload</code> / <code>formulit-upload-error</code></td><td>画像アップロードの完了 / 失敗</td><td><code>{ file, url }</code> / <code>{ file, error }</code></td></tr>
+  <tr><td><code>formulit-autosave</code> / <code>formulit-autosave-error</code></td><td>自動保存の成功 / 失敗</td><td><code>{ value }</code> / <code>{ error }</code></td></tr>
+  <tr><td><code>formulit-variable-insert</code></td><td>変数を挿入したとき</td><td><code>{ variable, text }</code></td></tr>
+  <tr><td><code>formulit-selectionchange</code></td><td>選択の変更（連続入力中は間引く）</td><td>—</td></tr>
+</table>
+
+<h2 id="css">CSS 変数と part</h2>
+<table>
+  <tr><th>名前</th><th>説明</th></tr>
+  <tr><td><code>--formulit-min-height</code></td><td>編集領域の最小の高さ（240px）</td></tr>
+  <tr><td><code>--formulit-padding</code></td><td>編集領域の余白（12px 16px）</td></tr>
+  <tr><td><code>--formulit-border</code> / <code>--formulit-radius</code></td><td>枠線の色 / 角丸</td></tr>
+  <tr><td><code>--formulit-bg</code> / <code>--formulit-toolbar-bg</code></td><td>背景色 / ツールバーの背景色</td></tr>
+  <tr><td><code>--formulit-fullscreen-width</code></td><td>全画面時の本文幅（860px）</td></tr>
+  <tr><td><code>::part(toolbar)</code> / <code>::part(body)</code> / <code>::part(source)</code> / <code>::part(status)</code></td><td>ツールバー / 本文部分 / HTML ソース / ステータスバー</td></tr>
+</table>
+
+<h2 id="exports">export</h2>
+<script type="text/plain" class="code" data-lang="js">
+  import {
+    // 要素・定数
+    FormulitEditor, DEFAULT_TOOLBAR, COMPACT_TOOLBAR, DEFAULT_PROTECT,
+    DEFAULT_FONT_FAMILIES, DEFAULT_FONT_SIZES, DEFAULT_LINE_HEIGHTS, DEFAULT_COLORS, SPECIAL_CHARS,
+    DEFAULT_IMAGE_STYLES, DEFAULT_CODE_LANGUAGES, MEDIA_PROVIDERS, SLASH_COMMANDS, SHORTCUTS, MARKDOWN_SHORTCUTS, DEFAULT_VARIABLE_FORMAT, icons,
+    // プラグイン
+    registerPlugin, getPlugin, getPlugins,
+    corePlugin, basicPlugin, formattingPlugin, typingPlugin, codeBlockPlugin, listsPlugin,
+    linkPlugin, imagePlugin, embedPlugin, productivityPlugin, tablePlugin, variablesPlugin,
+    // HTML 処理
+    load, parseHTML, sanitize, serialize, restore, setTemp, cleanPastedHTML, stripCopiedStyles,
+    serializeWithSource, equivalentHTML,
+    // インライン書式・機能
+    applyOps, removeFormatting, changeCase, insertImageFiles, uploadImage, matchMedia,
+    toCodeBlock, toggleTodo, findMatches, getStats, saveNow, buildGrid,
+    normalizeVariables, filterVariables, formatVariable, insertVariable,
+  } from 'formulit';
+</script>
+<p><code>import 'formulit'</code>（または上のいずれかの import）の時点で <code>&lt;formulit-editor&gt;</code> が定義され、組み込みプラグインが登録されます。</p>
+</main>
+</body>
+</html>
