@@ -39,7 +39,7 @@ npm install @hidemikimura/formulit lit
 | 方法 | 原文の保持 |
 |---|---|
 | `<script type="text/html">…</script>` を子に置く | **1 文字も変えずに**読み込む（`</script>` は `<\/script>` と書く） |
-| `value` プロパティに文字列を設定（サーバーから受け取った HTML など） | 1 文字も変えずに読み込む |
+| `value` プロパティに文字列を設定（サーバーから受け取った HTML、Lit の `.value=${…}` など） | 1 文字も変えずに読み込む。ページに付ける前に設定してもよく、その場合は子要素の初期値より優先 |
 | `<template>…</template>` を子に置く / `value` 属性 | ブラウザが一度パースするため、引用符・大文字・文字参照などの書き方は整形される（内容は保持） |
 
 Lit のテンプレートから使う場合:
@@ -283,7 +283,7 @@ git clone https://github.com/hidemikimura/formulit.git
 cd formulit
 npm install
 npm start      # demo/index.html をブラウザで開く
-npm test                  # Chromium で 95 項目の動作テスト（HTML 保持・部分的な原文保持・書式・表・貼り付け・生産性・フォーム連携など）
+npm test                  # Chromium で 100 項目の動作テスト（HTML 保持・部分的な原文保持・書式・表・貼り付け・生産性・フォーム連携など）
 BROWSER=firefox npm test  # Firefox で実行（webkit も指定可）
 npm run test:all          # Chromium / Firefox / WebKit(Safari のエンジン) の 3 つで実行
 npm run perf              # 大きな文書（約 300 段落）での 1 文字入力あたりの処理時間を計測（BROWSER= で切替）

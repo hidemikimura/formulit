@@ -228,6 +228,15 @@ export class FormulitEditor extends LitElement {
 
   constructor() {
     super();
+    // 要素が定義される前（アップグレード前）に設定されたプロパティを退避する。
+    // そのままだと下の初期化で上書きされたり、value のアクセサが隠れたりするため
+    const preset = {};
+    for (const key of ['value', 'imageUploader']) {
+      if (Object.prototype.hasOwnProperty.call(this, key)) {
+        preset[key] = this[key];
+        delete this[key];
+      }
+    }
     this.toolbar = null;
     this.plugins = null;
     this.sanitize = 'strip';
@@ -286,6 +295,8 @@ export class FormulitEditor extends LitElement {
     this._version = 0;
     this._cache = null;
     this._observer = new MutationObserver((records) => this._onMutations(records));
+    if ('imageUploader' in preset) this.imageUploader = preset.imageUploader;
+    if ('value' in preset) this.value = preset.value;
   }
 
   /* ============ 公開 API ============ */
@@ -320,6 +331,8 @@ export class FormulitEditor extends LitElement {
   }
 
   set value(v) {
+    // ページに付ける前に設定された値は、接続時に子要素などの初期値より優先する
+    if (!this._initialized) this._valueSetEarly = true;
     this._setContent(String(v ?? ''), { resetHistory: true });
     if (this._mode === 'source' && this._sourceArea) this._sourceArea.value = this._original;
   }
@@ -692,21 +705,32 @@ export class FormulitEditor extends LitElement {
     this._adoptLightStyles();
     if (!this._initialized) {
       this._initialized = true;
-      // 初期値: <script type="text/html">（原文を 1 文字も変えずに渡せる）> <template>（ブラウザが整形する）> value 属性 > 子要素
-      const raw = this.querySelector(':scope > script[type="text/html"]');
-      const tpl = this.querySelector(':scope > template');
-      let initial = raw
-        ? raw.textContent.replace(/<\\\/script/gi, '</script').replace(/^\r?\n/, '').replace(/\s+$/, '')
-        : tpl ? tpl.innerHTML : this.getAttribute('value');
-      if (initial == null) {
-        initial = [...this.childNodes].map((n) => (n.nodeType === 1 ? n.outerHTML : n.nodeType === 3 ? n.data : '')).join('').trim();
+      // 初期値: 接続前に設定した value プロパティ > <script type="text/html">（原文を 1 文字も変えずに渡せる）
+      //         > <template>（ブラウザが整形する）> value 属性 > 子要素
+      if (this._valueSetEarly) {
+        this.replaceChildren(this.editable);
+        this._initialValue = this._original;
+      } else {
+        this._readInitialContent();
       }
-      this.replaceChildren(this.editable);
-      this._initialValue = initial;
-      this._setContent(initial, { resetHistory: true });
     }
     this._bindEvents();
     this._cleanups.push(...this._activePlugins().map((p) => p.init?.(this)).filter((f) => typeof f === 'function'));
+  }
+
+  /** 子要素・属性から初期値を読み込む（最初の接続時） */
+  _readInitialContent() {
+    const raw = this.querySelector(':scope > script[type="text/html"]');
+    const tpl = this.querySelector(':scope > template');
+    let initial = raw
+      ? raw.textContent.replace(/<\\\/script/gi, '</script').replace(/^\r?\n/, '').replace(/\s+$/, '')
+      : tpl ? tpl.innerHTML : this.getAttribute('value');
+    if (initial == null) {
+      initial = [...this.childNodes].map((n) => (n.nodeType === 1 ? n.outerHTML : n.nodeType === 3 ? n.data : '')).join('').trim();
+    }
+    this.replaceChildren(this.editable);
+    this._initialValue = initial;
+    this._setContent(initial, { resetHistory: true });
   }
 
   disconnectedCallback() {

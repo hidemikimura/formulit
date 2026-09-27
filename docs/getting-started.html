@@ -88,7 +88,7 @@
 <table>
   <tr><th>方法</th><th>原文の保持</th></tr>
   <tr><td>子に <code>&lt;script type="text/html"&gt;…&lt;/script&gt;</code></td><td><strong>1 文字も変えずに</strong>読み込みます（中で <code>&lt;/script&gt;</code> を書くときは <code>&lt;\/script&gt;</code>）</td></tr>
-  <tr><td><code>value</code> プロパティに文字列を設定</td><td>1 文字も変えずに読み込みます（サーバーから受け取った HTML など）</td></tr>
+  <tr><td><code>value</code> プロパティに文字列を設定</td><td>1 文字も変えずに読み込みます（サーバーから受け取った HTML、Lit の <code>.value=${…}</code> など）。ページに付ける前に設定してもよく、その場合は子要素の初期値より優先します</td></tr>
   <tr><td>子に <code>&lt;template&gt;…&lt;/template&gt;</code> / <code>value</code> 属性</td><td>ブラウザが先にパースするため、引用符・大文字・文字参照の書き方は整形されます（内容は保持）</td></tr>
 </table>
 <script type="text/plain" class="code" data-lang="html">

@@ -1359,6 +1359,122 @@ await test('insertVariable() で挿入し、formulit-variable-insert を発火',
   await page.evaluate(() => { ed.variables = null; });
 });
 
+console.log('接続前の設定');
+await test('ページに付ける前に設定した value が接続後も残る（form の reset でもその値に戻る）', async () => {
+  const out = await page.evaluate(async () => {
+    const f = document.createElement('form');
+    const el = document.createElement('formulit-editor');
+    el.setAttribute('name', 'x');
+    el.value = '<P class=a>こんにちは</P>';
+    f.append(el);
+    document.body.append(f);
+    await el.updateComplete;
+    const r = { value: el.value, dom: el.editable.innerHTML, fd: new FormData(f).get('x'), dirty: el.dirty };
+    el.value = '<p>別</p>';
+    f.reset();
+    r.reset = el.value;
+    f.remove();
+    return r;
+  });
+  assert(out.value === '<P class=a>こんにちは</P>', 'value: ' + out.value);
+  assert(out.dom === '<p class="a">こんにちは</p>', 'dom: ' + out.dom);
+  assert(out.fd === '<P class=a>こんにちは</P>' && out.dirty === false, JSON.stringify(out));
+  assert(out.reset === '<P class=a>こんにちは</P>', 'reset: ' + out.reset);
+});
+
+await test('接続前の value は子要素の初期値より優先する', async () => {
+  const out = await page.evaluate(async () => {
+    const el = document.createElement('formulit-editor');
+    el.innerHTML = '<script type="text/html"><p>子要素</p><\/script>';
+    el.value = '<p>プロパティ</p>';
+    document.body.append(el);
+    await el.updateComplete;
+    const r = [el.value, el.querySelectorAll(':scope > script').length];
+    el.remove();
+    return r;
+  });
+  assert(out[0] === '<p>プロパティ</p>' && out[1] === 0, JSON.stringify(out));
+});
+
+await test('要素の定義前（アップグレード前）に設定した value・imageUploader・toolbar も引き継ぐ', async () => {
+  const out = await page.evaluate(async () => {
+    const doc = document.implementation.createHTMLDocument('');
+    const el = doc.createElement('formulit-editor'); // この文書には定義がないので未アップグレード
+    el.value = '<p>early</p>';
+    el.imageUploader = async () => 'x';
+    el.toolbar = ['bold'];
+    document.body.append(document.adoptNode(el));
+    await el.updateComplete;
+    const r = {
+      upgraded: typeof el.focusEditor === 'function', value: el.value,
+      uploader: typeof el.imageUploader, own: Object.prototype.hasOwnProperty.call(el, 'value'),
+      buttons: [...el.shadowRoot.querySelectorAll('.toolbar [data-item]')].map((b) => b.dataset.item).join(),
+    };
+    el.remove();
+    return r;
+  });
+  assert(out.upgraded && out.value === '<p>early</p>' && !out.own, JSON.stringify(out));
+  assert(out.uploader === 'function', 'imageUploader: ' + out.uploader);
+  assert(out.buttons === 'bold', 'toolbar: ' + out.buttons);
+});
+
+await test('Lit のテンプレートで .value を渡す（初回の描画・条件付きの描画でも値が入る）', async () => {
+  const out = await page.evaluate(async () => {
+    const { LitElement, html, render } = await import('lit');
+    // 1. render() で直接描画
+    const box = document.createElement('div');
+    document.body.append(box);
+    const view = (v) => html`<formulit-editor .value=${v} .variables=${[{ label: 'a', value: 'a' }]}></formulit-editor>`;
+    render(view('<p>lit の初期値</p>'), box);
+    const el = box.querySelector('formulit-editor');
+    await el.updateComplete;
+    const r = { first: el.value, text: el.editable.textContent, vars: !!el.shadowRoot.querySelector('[data-item="variable"]') };
+    render(view('<p>更新後</p>'), box);
+    r.updated = el.value;
+    r.same = box.querySelector('formulit-editor') === el;
+    box.remove();
+    // 2. LitElement の中で、ボタンを押したときに出す（updated() で読む）
+    if (!customElements.get('formulit-repro-test')) {
+      customElements.define('formulit-repro-test', class extends LitElement {
+        static properties = { shown: { state: true } };
+        constructor() { super(); this.shown = false; this.log = []; }
+        render() { return this.shown ? html`<formulit-editor .value=${'<p>こんにちは</p>'}></formulit-editor>` : ''; }
+        updated() { const e = this.renderRoot.querySelector('formulit-editor'); if (e) this.log.push(e.value); }
+      });
+    }
+    const host = document.createElement('formulit-repro-test');
+    document.body.append(host);
+    await host.updateComplete;
+    host.shown = true;
+    await host.updateComplete;
+    const ed = host.renderRoot.querySelector('formulit-editor');
+    await ed.updateComplete;
+    r.repro = [...host.log, ed.value, ed.editable.textContent];
+    host.remove();
+    return r;
+  });
+  assert(out.first === '<p>lit の初期値</p>' && out.text === 'lit の初期値', JSON.stringify(out));
+  assert(out.vars, 'variables');
+  assert(out.same && out.updated === '<p>更新後</p>', '再描画: ' + JSON.stringify(out));
+  assert(out.repro.join('|') === '<p>こんにちは</p>|<p>こんにちは</p>|こんにちは', '条件付きの描画: ' + JSON.stringify(out.repro));
+});
+
+await test('付け外ししても内容と履歴を保つ', async () => {
+  const out = await page.evaluate(async () => {
+    const el = document.createElement('formulit-editor');
+    el.value = '<p>a</p>';
+    document.body.append(el);
+    await el.updateComplete;
+    el.remove();
+    document.body.append(el);
+    await el.updateComplete;
+    const r = el.value;
+    el.remove();
+    return r;
+  });
+  assert(out === '<p>a</p>', out);
+});
+
 console.log('フォーム連携');
 await test('form の FormData に value が入る・reset で初期値に戻る', async () => {
   await setVal('<p>form</p>');

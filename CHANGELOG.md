@@ -2,6 +2,18 @@
 
 このプロジェクトの主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
+## [0.1.1] - 2026-09-27
+
+### 修正
+
+- ページに付ける前に設定した `value` が、接続時に空で上書きされていた不具合を修正しました。`document.createElement('formulit-editor')` の直後に `value` を設定した場合や、Lit のテンプレートで `.value=${…}` を渡した場合（初回の描画・条件付きの描画）に、内容が空になっていました。
+- 要素の定義（`import`）より前に設定した `value` と `imageUploader` が無視されていた不具合を修正しました。
+- 接続前に設定した `value` は、子要素（`<script type="text/html">` など）の初期値より優先するようにしました。`form.reset()` でもその値に戻ります。
+
+### 動作確認
+
+- Chromium・Firefox・WebKit で自動テスト 100 項目に合格（接続前の設定・Lit からの利用のテストを 5 項目追加）。
+
 ## [0.1.0] - 2026-09-25
 
 最初の公開版です。npm のパッケージ名は `@hidemikimura/formulit`（`npm install @hidemikimura/formulit lit`、`import '@hidemikimura/formulit'`）です。
@@ -30,4 +42,5 @@
 - Chromium・Firefox・WebKit の 3 エンジンで自動テスト 95 項目に合格。
 - macOS の Safari で ⌘ キーのショートカットと日本語入力の確定を手動で確認。
 
+[0.1.1]: https://github.com/hidemikimura/formulit/releases/tag/v0.1.1
 [0.1.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.1.0
