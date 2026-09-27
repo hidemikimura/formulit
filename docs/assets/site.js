@@ -6,7 +6,7 @@ const PAGES = [
   { group: '拡張', items: [['plugins.html', 'プラグインの作り方'], ['recipes.html', 'レシピ']] },
   { group: 'リファレンス', items: [['api.html', 'API リファレンス'], ['ai-skills.html', 'AI 用スキル']] },
 ];
-const VERSION = '0.1.0';
+const VERSION = '0.1.1';
 
 const here = (location.pathname.split('/').pop() || 'index.html');
 const flat = PAGES.flatMap((g) => g.items);
