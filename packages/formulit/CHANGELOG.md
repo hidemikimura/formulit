@@ -2,6 +2,22 @@
 
 このパッケージ（`@hidemikimura/formulit`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
+## [0.2.1] - 2026-09-28
+
+### 修正
+
+- エディタ（`<formulit-editor>` / `<formulit-markdown>`）を Lit コンポーネントなどの**シャドウ DOM の中**に置くと、選択範囲を使う機能が動かなかった不具合を修正。`document.getSelection()` は Chrome・Safari でシャドウ DOM の中の選択を返さないため、`ShadowRoot#getSelection()`（Chromium）と `Selection#getComposedRanges()`（Safari・Firefox）で取得するようにした。
+  - 影響していた機能：選択範囲へのリンク・書式、カーソル位置の判定（スラッシュコマンド・差し込み変数・ツールバーの状態表示など）、ダイアログを開いたあとの選択の復元、元に戻したときのカーソル位置、画像のドロップ位置、Markdown 版の選択範囲のコピー（`getSelectionMarkdown()`）。
+- 元に戻したとき、カーソルが編集した位置ではなく段落の先頭などに戻ることがあった不具合を修正（編集を始める直前のカーソル位置を覚えるようにした）。
+
+### 追加
+
+- `getSelectionRange(node)` / `setSelectionRange(range, node)` / `activeElementOf(node)` / `caretRangeAt(x, y, node)`：シャドウ DOM の中でも使える選択範囲の取得・設定（独自プラグイン用）。
+
+### 動作確認
+
+- Chromium・Firefox・WebKit で自動テスト 108 項目（シャドウ DOM の中での操作 5 項目・元に戻すの 1 項目を追加）と formulit-markdown の 47 項目に合格。
+
 ## [0.2.0] - 2026-09-28
 
 ### 追加
@@ -65,6 +81,7 @@
 - Chromium・Firefox・WebKit の 3 エンジンで自動テスト 95 項目に合格。
 - macOS の Safari で ⌘ キーのショートカットと日本語入力の確定を手動で確認。
 
+[0.2.1]: https://github.com/hidemikimura/formulit/releases/tag/v0.2.1
 [0.2.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.2.0
 [0.1.1]: https://github.com/hidemikimura/formulit/releases/tag/v0.1.1
 [0.1.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.1.0

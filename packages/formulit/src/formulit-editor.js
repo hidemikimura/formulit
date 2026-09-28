@@ -4,6 +4,7 @@ import { load, serialize, DEFAULT_PROTECT } from './core/html.js';
 import { History } from './core/history.js';
 import { serializeWithSource, recordMutation, cloneWithMeta, equivalentHTML } from './core/source-map.js';
 import { getPlugins } from './core/plugins.js';
+import { getSelectionRange, setSelectionRange, activeElementOf } from './core/selection.js';
 import {
   applyOps, isWrapActive, styleAt, selectedBlocks, insertStyledText,
 } from './core/inline.js';
@@ -292,6 +293,12 @@ export class FormulitEditor extends LitElement {
       snapshot: (root) => [...root.childNodes].map(cloneWithMeta),
       restore: (root, nodes) => root.replaceChildren(...nodes.map(cloneWithMeta)),
     });
+    // 最後に履歴へ記録してから内容が変わったか（元に戻したときのカーソル位置を覚えるかの判断用）
+    this._unrecorded = false;
+    for (const m of ['record', 'reset', 'undo', 'redo', 'amend']) {
+      const f = this.history[m].bind(this.history);
+      this.history[m] = (...args) => { const r = f(...args); this._unrecorded = false; return r; };
+    }
     this._version = 0;
     this._cache = null;
     this._observer = new MutationObserver((records) => this._onMutations(records));
@@ -363,6 +370,8 @@ export class FormulitEditor extends LitElement {
     if (this.readonly || this._mode === 'source') return;
     this._flushTyping();
     if (!this._noFocus) this.focusEditor();
+    // 元に戻したときに戻るカーソル位置（変更の直前の位置）
+    this.history.noteSelection({ verify: false });
     const result = fn(this);
     this._afterChange();
     return result;
@@ -592,11 +601,9 @@ export class FormulitEditor extends LitElement {
 
   /** 編集領域内の選択範囲（無ければ最後の選択、それも無ければ末尾） */
   getRange(fallbackToEnd = false) {
-    const sel = document.getSelection();
-    if (sel?.rangeCount) {
-      const r = sel.getRangeAt(0);
-      if (this.editable.contains(r.commonAncestorContainer)) return r;
-    }
+    // シャドウ DOM の中に置かれていても、中の本当の選択範囲を取る（core/selection.js）
+    const cur = getSelectionRange(this.editable);
+    if (cur && this.editable.contains(cur.commonAncestorContainer)) return cur;
     if (this._lastRange && this.editable.contains(this._lastRange.commonAncestorContainer)) {
       return this._lastRange.cloneRange();
     }
@@ -608,9 +615,7 @@ export class FormulitEditor extends LitElement {
   }
 
   selectRange(range) {
-    const sel = document.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
+    setSelectionRange(range, this.editable);
     this._lastRange = range.cloneRange();
   }
 
@@ -641,8 +646,8 @@ export class FormulitEditor extends LitElement {
 
   focusEditor() {
     if (this._mode === 'source') return this._sourceArea?.focus();
-    const sel = document.getSelection();
-    const wasInside = sel.rangeCount > 0 && this.editable.contains(sel.getRangeAt(0).commonAncestorContainer);
+    const cur = getSelectionRange(this.editable);
+    const wasInside = !!cur && this.editable.contains(cur.commonAncestorContainer);
     const had = this.getRange();
     this.editable.focus({ preventScroll: true });
     // 選択が編集領域の外（ツールバーの入力欄など）にあった場合は、最後の選択位置に戻す
@@ -1086,6 +1091,7 @@ export class FormulitEditor extends LitElement {
     let real = false;
     for (const r of records) if (recordMutation(r, this.editable)) real = true;
     if (!real) return;
+    this._unrecorded = true;
     this._version++;
     this._dirty = true;
     this._updateEmpty();
@@ -1258,7 +1264,7 @@ export class FormulitEditor extends LitElement {
         target.setAttribute('data-formulit-selected', '');
         requestAnimationFrame(() => {
           // ダイアログなどにフォーカスが移った後で選択を変えると、Chrome は編集領域へフォーカスを戻してしまう
-          if (this._dialog || document.activeElement !== this.editable) { this.requestUpdate(); return; }
+          if (this._dialog || activeElementOf(this.editable) !== this.editable) { this.requestUpdate(); return; }
           const r = document.createRange();
           r.selectNode(target);
           this.selectRange(r);
@@ -1302,12 +1308,15 @@ export class FormulitEditor extends LitElement {
     on(window, 'resize', () => this.requestUpdate());
     on(ed, 'load', () => this.requestUpdate(), true);
 
+    // 入力で内容が変わる直前のカーソル位置を、元に戻したときの位置として覚える
+    on(ed, 'beforeinput', () => { if (!this._unrecorded) this.history.noteSelection({ verify: false }); });
+
     on(document, 'selectionchange', () => {
-      const sel = document.getSelection();
-      if (!sel?.rangeCount) return;
-      const r = sel.getRangeAt(0);
-      if (!ed.contains(r.commonAncestorContainer)) return;
+      const r = getSelectionRange(ed);
+      if (!r || !ed.contains(r.commonAncestorContainer)) return;
       this._lastRange = r.cloneRange();
+      // 入力の途中でなければ、元に戻したときに戻るカーソル位置として覚える
+      if (!this._unrecorded) this.history.noteSelection({ verify: false });
       this._scheduleUi({ selection: true });
     });
   }

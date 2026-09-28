@@ -281,7 +281,8 @@ registerPlugin({
 
 ## 現状の制限と今後の候補
 
-- 編集領域はライト DOM（シャドウ DOM 内では Selection API のブラウザ差が大きいため）。サイトの本文 CSS がそのまま効く一方、ページ側の CSS の影響も受けます。完全に分離したい場合は iframe モードの追加が候補です。
+- 編集領域は `<formulit-editor>` のライト DOM にあります（要素自身のシャドウ DOM の中ではない）。サイトの本文 CSS がそのまま効く一方、ページ側の CSS の影響も受けます。完全に分離したい場合は iframe モードの追加が候補です。
+- `<formulit-editor>` 自体は、Lit コンポーネントなどのシャドウ DOM の中に置けます（0.2.1 以降。選択範囲は `ShadowRoot#getSelection()` / `Selection#getComposedRanges()` で取得します）。独自プラグインで選択範囲を扱うときは `document.getSelection()` ではなく `editor.getRange()` / `editor.selectRange()` を使ってください。
 - `execCommand` を利用（非推奨扱いだが全主要ブラウザで動作）。将来的に置き換える場合も API はプラグイン側から変わりません。
 - 自動テストは Chromium 141 / Firefox 155 / WebKit 26.6 の 3 エンジンで全項目合格（Linux・macOS の両方で `npm run test:all` 合格）。macOS の Safari 実機で ⌘ キーのショートカット（⌘B / ⌘Z など）と日本語入力の変換確定（Enter で余計な改行が入らない）を手動確認済み。
 - ブラウザ差異への対応済み項目: 空のエディタでの最初の入力を必ず `<p>` にする（Chrome/Safari）、日本語入力の変換中はショートカットを無視、Chrome/Safari がコピー時に書き込む計算済みスタイル（`orphans` / `widows` などを含む style）を貼り付け時に除去。

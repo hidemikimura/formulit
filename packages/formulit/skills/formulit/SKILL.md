@@ -55,7 +55,8 @@ html`<formulit-editor
 6. **独自プラグインは `registerPlugin()` を要素が DOM に追加される前に呼ぶ。** ツールバー項目は後からでも反映されるが、`init()`・`prepare()` は接続時／読み込み時に登録済みのプラグインにしか適用されない。
 7. **プラグインから DOM を変えるときは必ず `editor.transact(() => { ... })` の中で行う。** 1 回の「元に戻す」単位になり、変更検知・フォーム値・`input` イベントが正しく動く。`execCommand` だけなら `editor.exec(command, value)`。
 8. **編集中だけの属性変更は `setTemp(el, name, value)` を使う**（書き出し時に値と並び順が元に戻る）。`data-formulit-` で始まる属性はエディタ内部用で、出力から自動的に取り除かれる。利用側でこの接頭辞を使わない。
-9. **編集領域はライト DOM（シャドウ DOM の外）にある。** ページの CSS が本文に効く（本文の見た目をサイトと揃えられる）一方、ページ側の CSS の影響も受ける。ツールバー等の見た目は CSS 変数・`::part()` で変える。
+9. **編集領域はライト DOM（要素自身のシャドウ DOM の外）にある。** ページの CSS が本文に効く（本文の見た目をサイトと揃えられる）一方、ページ側の CSS の影響も受ける。ツールバー等の見た目は CSS 変数・`::part()` で変える。
+10. **選択範囲は `editor.getRange()` / `editor.selectRange(range)` で扱う。** `document.getSelection()` / `window.getSelection()` は、エディタが Lit コンポーネントなどのシャドウ DOM の中にあると中の選択を返さない（Chrome・Safari）。プラグインで直接必要なら `getSelectionRange(node)` / `setSelectionRange(range, node)`（export）を使う。
 
 ## よく使う設定
 

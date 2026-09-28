@@ -1491,6 +1491,89 @@ await test('付け外ししても内容と履歴を保つ', async () => {
   assert(out === '<p>a</p>', out);
 });
 
+console.log('シャドウ DOM の中');
+// Lit コンポーネントなどのシャドウ DOM の中に置いた場合（document.getSelection() では中の選択が取れない）
+await page.evaluate(() => {
+  if (!customElements.get('shadow-host-test')) {
+    customElements.define('shadow-host-test', class extends HTMLElement {
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' }).innerHTML = '<formulit-editor toolbar="undo redo bold italic link ul"></formulit-editor>';
+      }
+    });
+  }
+  const h = document.createElement('shadow-host-test');
+  document.body.append(h);
+  window.sed = h.shadowRoot.querySelector('formulit-editor');
+});
+const S = 'shadow-host-test formulit-editor';
+const sval = () => page.evaluate(() => sed.value);
+const sset = (v) => page.evaluate((v) => { sed.value = v; }, v);
+const sEnd = async (selector) => { await page.click(`${S} .formulit-editable ${selector}`); await page.keyboard.press('End'); };
+const sSelectLeft = async (n) => { for (let i = 0; i < n; i++) await page.keyboard.press('Shift+ArrowLeft'); };
+
+await test('シャドウ DOM の中：getRange() が中の選択範囲を返す', async () => {
+  await sset('<p>hello world</p>');
+  await sEnd('p');
+  await sSelectLeft(5);
+  const r = await page.evaluate(() => { const r = sed.getRange(); return r && [r.toString(), sed.editable.contains(r.commonAncestorContainer)]; });
+  assert(r && r[0] === 'world' && r[1], JSON.stringify(r));
+});
+
+await test('シャドウ DOM の中：選択してツールバーの太字・Ctrl+I', async () => {
+  await sset('<p>hello world</p>');
+  await sEnd('p');
+  await sSelectLeft(5);
+  await page.click(`${S} >> button[data-item="bold"]`);
+  assert(await sval() === '<p>hello <b>world</b></p>', 'bold: ' + await sval());
+  await sEnd('p');
+  await sSelectLeft(5);
+  await page.keyboard.press('ControlOrMeta+i');
+  assert(await sval() === '<p>hello <b><i>world</i></b></p>', 'italic: ' + await sval());
+});
+
+await test('シャドウ DOM の中：選択範囲にリンク（ダイアログを経ても選択を覚えている）', async () => {
+  await sset('<p>click here</p>');
+  await sEnd('p');
+  await sSelectLeft(4);
+  await page.click(`${S} >> button[data-item="link"]`);
+  await page.fill(`${S} >> input[name=href]`, 'https://a.example/');
+  await page.click(`${S} >> .dialog button[type=submit]`);
+  assert(await sval() === '<p>click <a href="https://a.example/">here</a></p>', await sval());
+});
+
+await test('シャドウ DOM の中：入力・元に戻す後もカーソル位置に入力される', async () => {
+  await sset('<p>abc</p>');
+  await sEnd('p');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.type('X');
+  assert(await sval() === '<p>abXc</p>', 'input: ' + await sval());
+  await page.keyboard.press('ControlOrMeta+z');
+  await page.keyboard.type('Y');
+  assert(await sval() === '<p>abYc</p>', 'undo 後: ' + await sval());
+});
+
+await test('（比較）シャドウ DOM の外：入力・元に戻す後もカーソル位置に入力される', async () => {
+  await setVal('<p>abc</p>');
+  await page.click('formulit-editor .formulit-editable p');
+  await page.keyboard.press('End');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.type('X');
+  await page.keyboard.press('ControlOrMeta+z');
+  await page.keyboard.type('Y');
+  assert(await val() === '<p>abYc</p>', 'undo 後: ' + await val());
+});
+
+await test('シャドウ DOM の中：行頭の / でコマンドメニュー', async () => {
+  await sset('<p><br></p>');
+  await page.click(`${S} .formulit-editable p`);
+  await page.keyboard.type('/');
+  await page.waitForFunction(() => sed.shadowRoot.querySelector('.popup .opt'), null, { timeout: 3000 });
+  await page.keyboard.press('Escape');
+});
+
+await page.evaluate(() => document.querySelector('shadow-host-test').remove());
+
 console.log('フォーム連携');
 await test('form の FormData に value が入る・reset で初期値に戻る', async () => {
   await setVal('<p>form</p>');

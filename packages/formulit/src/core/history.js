@@ -3,6 +3,8 @@
  * execCommand 以外の DOM 操作（表の挿入など）も一律に扱えるよう、
  * ブラウザ標準の undo は使わず innerHTML と選択位置を保存する。
  */
+import { getSelectionRange, setSelectionRange } from './selection.js';
+
 export class History {
   /**
    * snapshot(root) / restore(root, snap) を渡すと、innerHTML の代わりにそれで保存・復元する
@@ -32,6 +34,19 @@ export class History {
     if (this.stack.length > this.limit) this.stack.shift();
     this.index = this.stack.length - 1;
     return true;
+  }
+
+  /**
+   * 内容が今の履歴と同じなら、その履歴のカーソル位置を今の位置にする。
+   * 元に戻したとき、編集を始めた位置にカーソルが戻るようにするため（編集の前にカーソルを動かした場合も）。
+   */
+  noteSelection({ verify = true } = {}) {
+    const cur = this.stack[this.index];
+    if (!cur) return;
+    const sel = saveSelection(this.root);
+    if (!sel) return;
+    // verify: false は、呼び出し側が「最後の記録から内容が変わっていない」と分かっている場合（大きな文書で毎回比べないため）
+    if (!verify || this.root.innerHTML.replace(/ data-formulit-(?:selected|cell-selected)=""/g, '') === cur.html) cur.sel = sel;
   }
 
   /** 現在の状態で最新の履歴を置き換える（見た目だけの補正用） */
@@ -80,10 +95,8 @@ function nodeAt(root, path) {
 }
 
 export function saveSelection(root) {
-  const sel = root.ownerDocument.getSelection();
-  if (!sel || sel.rangeCount === 0) return null;
-  const r = sel.getRangeAt(0);
-  if (!root.contains(r.commonAncestorContainer)) return null;
+  const r = getSelectionRange(root);
+  if (!r || !root.contains(r.commonAncestorContainer)) return null;
   const start = pathOf(root, r.startContainer);
   const end = pathOf(root, r.endContainer);
   if (!start || !end) return null;
@@ -99,9 +112,7 @@ export function restoreSelection(root, saved) {
     const r = root.ownerDocument.createRange();
     r.setStart(s, Math.min(saved.startOffset, maxOffset(s)));
     r.setEnd(e, Math.min(saved.endOffset, maxOffset(e)));
-    const sel = root.ownerDocument.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(r);
+    setSelectionRange(r, root);
   } catch {
     /* 構造が変わって復元できない場合は無視 */
   }

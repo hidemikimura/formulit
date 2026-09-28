@@ -34,6 +34,7 @@ export { SLASH_COMMANDS } from './plugins/typing.js';
 export { toggleTodo } from './plugins/lists.js';
 export { findMatches, getStats, saveNow, SHORTCUTS, MARKDOWN_SHORTCUTS } from './plugins/productivity.js';
 export { buildGrid } from './plugins/table.js';
+export { getSelectionRange, setSelectionRange, activeElementOf, caretRangeAt } from './core/selection.js';
 export {
   DEFAULT_VARIABLE_FORMAT, normalizeVariables, filterVariables, formatVariable, insertVariable,
 } from './plugins/variables.js';

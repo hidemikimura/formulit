@@ -1,4 +1,5 @@
 import { icons } from '../icons.js';
+import { caretRangeAt } from '../core/selection.js';
 
 /**
  * 画像：挿入・編集、キャプション、配置、リサイズ（本体側のハンドル）、
@@ -280,7 +281,7 @@ export const imagePlugin = {
       const files = [...(e.dataTransfer?.files ?? [])].filter((f) => f.type.startsWith('image/'));
       if (!files.length) return;
       e.preventDefault();
-      const r = caretRangeAt(e.clientX, e.clientY);
+      const r = caretRangeAt(e.clientX, e.clientY, ed.editable);
       if (r && ed.editable.contains(r.startContainer)) ed.selectRange(r);
       insertImageFiles(ed, files);
     };
@@ -301,13 +302,3 @@ export const imagePlugin = {
     };
   },
 };
-
-function caretRangeAt(x, y) {
-  if (document.caretRangeFromPoint) return document.caretRangeFromPoint(x, y);
-  const pos = document.caretPositionFromPoint?.(x, y);
-  if (!pos) return null;
-  const r = document.createRange();
-  r.setStart(pos.offsetNode, pos.offset);
-  r.collapse(true);
-  return r;
-}

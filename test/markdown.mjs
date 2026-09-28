@@ -424,6 +424,36 @@ await test('<formulit-editor> と同じページで共存し、互いの既定�
   assert(out[0] > out[1] && out[2] && !out[3], JSON.stringify(out));
 });
 
+await test('シャドウ DOM の中：選択して太字 → **、getSelectionMarkdown()、コピー', async () => {
+  await page.evaluate(() => {
+    if (!customElements.get('md-shadow-host')) {
+      customElements.define('md-shadow-host', class extends HTMLElement {
+        constructor() { super(); this.attachShadow({ mode: 'open' }).innerHTML = '<formulit-markdown></formulit-markdown>'; }
+      });
+    }
+    const h = document.createElement('md-shadow-host');
+    document.body.append(h);
+    window.smd = h.shadowRoot.querySelector('formulit-markdown');
+    smd.value = 'hello world\n\n- a\n';
+  });
+  await page.click('md-shadow-host formulit-markdown .formulit-editable p');
+  await page.keyboard.press('End');
+  for (let i = 0; i < 5; i++) await page.keyboard.press('Shift+ArrowLeft');
+  eq(await page.evaluate(() => smd.getSelectionMarkdown()), 'world', 'getSelectionMarkdown');
+  await page.click('md-shadow-host formulit-markdown >> button[data-item="bold"]');
+  eq(await page.evaluate(() => smd.value), 'hello **world**\n\n- a\n', '太字');
+  const copied = await page.evaluate(() => {
+    const r = document.createRange(); r.selectNodeContents(smd.editable); smd.focusEditor(); smd.selectRange(r);
+    const dt = new DataTransfer();
+    const ev = new ClipboardEvent('copy', { clipboardData: dt, bubbles: true, cancelable: true });
+    Object.defineProperty(ev, 'clipboardData', { value: dt });
+    smd.editable.dispatchEvent(ev);
+    return dt.getData('text/plain');
+  });
+  eq(copied, 'hello **world**\n\n- a', 'コピー');
+  await page.evaluate(() => document.querySelector('md-shadow-host').remove());
+});
+
 await test('ページエラー・alert が発生していない', async () => {
   assert(errors.length === 0, errors.join('\n'));
 });

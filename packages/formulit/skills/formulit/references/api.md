@@ -134,6 +134,6 @@ formulit-editor .lead { font-size: 1.15em; }
 - プラグイン: `registerPlugin`, `getPlugin`, `getPlugins`, `corePlugin`, `basicPlugin`, `formattingPlugin`, `typingPlugin`, `codeBlockPlugin`, `listsPlugin`, `linkPlugin`, `imagePlugin`, `embedPlugin`, `productivityPlugin`, `tablePlugin`, `variablesPlugin`
 - HTML 処理: `load`, `parseHTML`, `sanitize`, `serialize`, `restore`, `setTemp`, `TMP_ATTR`, `cleanPastedHTML`, `stripCopiedStyles`, `serializeWithSource`, `equivalentHTML`
 - インライン書式: `applyOps`, `splitBoundaries`, `textNodesInRange`, `closestBlock`, `selectedBlocks`, `inlineAncestors`, `isolate`, `unwrap`, `removeFormatting`, `changeCase` ほか
-- 機能の関数: `insertImageFiles`, `uploadImage`, `matchMedia`, `toCodeBlock`, `toggleTodo`, `findMatches`, `getStats`, `saveNow`, `buildGrid`, `normalizeVariables`, `filterVariables`, `formatVariable`, `insertVariable(editor, v)`
+- 機能の関数: `insertImageFiles`, `uploadImage`, `matchMedia`, `toCodeBlock`, `toggleTodo`, `findMatches`, `getStats`, `saveNow`, `buildGrid`, `getSelectionRange(node)` / `setSelectionRange(range, node)` / `activeElementOf(node)` / `caretRangeAt(x, y, node)`（シャドウ DOM の中でも使える選択範囲の取得・設定）, `normalizeVariables`, `filterVariables`, `formatVariable`, `insertVariable(editor, v)`
 
 組み込みプラグインの名前（`plugins` 属性用）: `core`, `basic`, `formatting`, `typing`, `codeBlock`, `lists`, `link`, `image`, `embed`, `productivity`, `table`, `variables`。

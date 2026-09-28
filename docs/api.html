@@ -78,7 +78,7 @@
   <tr><td><code>transact(fn)</code></td><td>DOM 変更を 1 つの履歴にまとめる</td></tr>
   <tr><td><code>exec(command, value?)</code> / <code>queryState(command)</code></td><td><code>execCommand</code> の実行 / 状態</td></tr>
   <tr><td><code>insertNodes(node)</code> / <code>insertNodesAtSelection(node)</code></td><td>ノードの挿入（transact 外 / 内）</td></tr>
-  <tr><td><code>getRange(fallbackToEnd?)</code> / <code>selectRange(range)</code></td><td>選択範囲の取得・設定</td></tr>
+  <tr><td><code>getRange(fallbackToEnd?)</code> / <code>selectRange(range)</code></td><td>選択範囲の取得・設定（シャドウ DOM の中でも正しく動く。<code>document.getSelection()</code> は使わない）</td></tr>
   <tr><td><code>setCaretAt(node, offset)</code> / <code>setCaretAfter(node)</code></td><td>カーソルの設定</td></tr>
   <tr><td><code>closestAtSelection(selector)</code> / <code>selectedBlocks()</code></td><td>カーソル位置の要素 / 選択中のブロック</td></tr>
   <tr><td><code>applyInline(ops)</code> / <code>toggleInline(op)</code> / <code>isInlineActive(op)</code></td><td>インライン書式</td></tr>
@@ -133,6 +133,8 @@
     applyOps, removeFormatting, changeCase, insertImageFiles, uploadImage, matchMedia,
     toCodeBlock, toggleTodo, findMatches, getStats, saveNow, buildGrid,
     normalizeVariables, filterVariables, formatVariable, insertVariable,
+    // 選択範囲（シャドウ DOM の中でも使える。独自プラグイン用）
+    getSelectionRange, setSelectionRange, activeElementOf, caretRangeAt,
   } from '@hidemikimura/formulit';
 </script>
 <p><code>import '@hidemikimura/formulit'</code>（または上のいずれかの import）の時点で <code>&lt;formulit-editor&gt;</code> が定義され、組み込みプラグインが登録されます。</p>
