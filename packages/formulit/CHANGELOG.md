@@ -1,6 +1,29 @@
 # 変更履歴
 
-このプロジェクトの主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
+このパッケージ（`@hidemikimura/formulit`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
+
+## [0.2.0] - 2026-09-28
+
+### 追加
+
+- 継承して別の形式のエディタを作るための口（`@hidemikimura/formulit-markdown` が使用）。
+  - `defaultToolbar`：`toolbar` を設定しないときのツールバー。継承した要素で差し替えられる。
+  - `setNodeData(node, data)` / `getNodeData(node)` / `isNodeUnchanged(node)`：ノードに付加情報を持たせ、読み込み後に変更されたかを調べる（元に戻す・やり直しでも引き継がれる）。
+  - 読み込み処理 `_loadContent(text)` を差し替えられるようにした。
+- 編集領域の既定のスタイルが `<formulit-markdown>` にも効くようにした。
+
+### 修正
+
+- 入力変換（`` `code` ``・`**太字**` など）の直後に Enter を押すと、次の行にも装飾が持ち越されていた不具合を修正。
+- 箇条書きのすぐ後の段落で `[] ` と入力（または ToDo ボタン）すると、前の箇条書きとつながって全体が ToDo になっていた不具合を修正。カーソルのある段落だけが ToDo になる。
+
+### その他
+
+- リポジトリを npm workspaces に分けた（`packages/formulit`・`packages/formulit-markdown`）。パッケージの中身と使い方は変わらない。
+
+### 動作確認
+
+- Chromium・Firefox・WebKit で自動テスト 102 項目に合格（上の 2 件の修正のテストを追加）。
 
 ## [0.1.1] - 2026-09-27
 
@@ -42,5 +65,6 @@
 - Chromium・Firefox・WebKit の 3 エンジンで自動テスト 95 項目に合格。
 - macOS の Safari で ⌘ キーのショートカットと日本語入力の確定を手動で確認。
 
+[0.2.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.2.0
 [0.1.1]: https://github.com/hidemikimura/formulit/releases/tag/v0.1.1
 [0.1.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.1.0

@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Markdown エディタ | formulit</title>
+<meta name="description" content="formulit-markdown：見たまま編集して Markdown（GFM）で保存する Lit 製の WYSIWYG エディタ。編集していないブロックは原文のまま返します。">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+<script type="importmap">
+{ "imports": {
+  "lit": "./lib/vendor/lit/index.js", "lit/": "./lib/vendor/lit/",
+  "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
+  "lit-element/": "./lib/vendor/lit-element/",
+  "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
+  "markdown-it": "./lib/vendor/markdown-it/markdown-it.js",
+  "@hidemikimura/formulit": "./lib/formulit/src/index.js",
+  "@hidemikimura/formulit-markdown": "./lib/formulit-markdown/src/index.js"
+} }
+</script>
+<script type="module" src="assets/site.js"></script>
+</head>
+
+<body>
+<main>
+<h1>Markdown エディタ（formulit-markdown）</h1>
+<p class="lead"><code>&lt;formulit-markdown&gt;</code> は、Typora のように<strong>見たまま編集して、Markdown（GFM）で保存する</strong>エディタです。formulit のツールバー・プラグイン・入力補助をそのまま使い、<code>value</code> だけが Markdown になります。</p>
+
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b><span id="md-state"></span></div>
+  <div class="demo-body">
+    <div class="controls">
+      <label><input type="checkbox" id="md-keep" checked> 触っていないブロックは原文のまま（preserve-source）</label>
+      <label><input type="checkbox" id="md-plain"> 既定の見た目を外す（plain）</label>
+      <button class="btn" type="button" id="md-reset">最初の内容に戻す</button>
+    </div>
+    <div class="cols">
+      <div>
+        <formulit-markdown id="md" word-count style="--formulit-min-height:420px">
+          <script type="text/markdown">
+            読み込み中…
+          </script>
+        </formulit-markdown>
+      </div>
+      <div><h4>value（Markdown）</h4><pre class="out" id="md-out" style="margin:0;max-height:520px"></pre></div>
+    </div>
+  </div>
+</div>
+<script type="module" id="md-script">
+  import '@hidemikimura/formulit-markdown';
+  const ed = document.getElementById('md');
+  const out = document.getElementById('md-out');
+  const sample = `記事のタイトル
+==============
+
+Typora のように**見たまま**編集できます。*斜体*、~~取り消し~~、\`コード\`、[リンク][docs]。
+行頭で \`# \` や \`- \`、\`[] \` と入力すると、その場で変換されます。
+
+* この箇条書きは \`*\` で書かれています
+* 触らなければ \`*\` のまま残ります
+
+- [x] ToDo はクリックで完了
+- [ ] 未完了
+
+> 引用も書けます。
+
+~~~js
+const markdown = editor.value;
+~~~
+
+| 機能 | 対応 |
+|:-----|:----:|
+| 表   | ✓    |
+
+Markdown で表せない書式は <span style="color: #d93025">HTML のまま</span>残ります。
+
+[docs]: https://hidemikimura.github.io/formulit/
+`;
+  ed.variables = [{ type: 'group', label: '記事', variables: [{ label: 'タイトル', value: 'title' }, { label: '著者', value: 'author' }] }];
+  const show = () => {
+    out.textContent = ed.value;
+    document.getElementById('md-state').textContent = ed.dirty
+      ? (ed.preserveSource ? '編集済み：触ったブロックだけ書き直し、ほかは原文のまま' : '編集済み：全体を書き直しています')
+      : '未編集：読み込んだ Markdown をそのまま返しています';
+  };
+  let t;
+  ed.addEventListener('input', () => { clearTimeout(t); t = setTimeout(show, 120); });
+  document.getElementById('md-keep').onchange = (e) => { ed.preserveSource = e.target.checked; show(); };
+  document.getElementById('md-plain').onchange = (e) => { ed.toggleAttribute('plain', e.target.checked); };
+  document.getElementById('md-reset').onclick = () => { ed.value = sample; show(); };
+  await customElements.whenDefined('formulit-markdown');
+  ed.value = sample;
+  show();
+</script>
+
+<h2 id="features">特長</h2>
+<ul>
+  <li><strong>編集していない部分は原文のまま</strong>：未編集なら読み込んだ Markdown を 1 文字も変えずに返します。編集後も、触っていないブロック（段落・リスト・表など）は原文の書き方（<code>*</code> と <code>-</code>、<code>__</code> と <code>**</code>、setext 見出し、参照リンク、空行の数）を保ち、編集したブロックだけを書き直します。上のデモで一部だけ編集して確かめてください。</li>
+  <li><strong>GFM</strong>：表（配置つき）・取り消し線・ToDo リスト（クリックで完了）・URL の自動リンク。</li>
+  <li><strong>表せない内容は HTML のまま</strong>：文字色・下線・結合セル・属性付きの要素・独自要素などは、Markdown の中に HTML として残ります（GitHub などでもそのまま表示されます）。</li>
+  <li><strong>貼り付けとコピー</strong>：Markdown の文字を貼り付けると書式付きで入り、コピーした文字（text/plain）は Markdown になります。</li>
+  <li><strong>ソース表示は Markdown</strong>：ツールバーの「&lt;/&gt;」で Markdown を直接編集できます。</li>
+  <li>元に戻す・検索と置換・文字数・自動保存・全画面・差し込み変数・フォーム連携など、formulit の機能はそのまま使えます。</li>
+</ul>
+
+<h2 id="install">インストールと使い方</h2>
+<script type="text/plain" class="code" data-lang="bash">
+  npm install @hidemikimura/formulit-markdown @hidemikimura/formulit lit
+</script>
+<p><code>@hidemikimura/formulit</code> と <code>lit</code> 3 は peerDependency です。Markdown の解析には <a href="https://github.com/markdown-it/markdown-it">markdown-it</a> を使います（自動で入ります）。</p>
+<script type="text/plain" class="code" data-lang="html">
+  <script type="module">
+    import '@hidemikimura/formulit-markdown'; // <formulit-markdown>（と <formulit-editor>）が定義される
+  <\/script>
+
+  <form>
+    <formulit-markdown name="body" placeholder="本文を入力…">
+      <script type="text/markdown">
+        # 見出し
+
+        本文です。**太字**や [リンク](https://example.com) が使えます。
+      <\/script>
+    </formulit-markdown>
+  </form>
+</script>
+<ul>
+  <li>初期値は <code>&lt;script type="text/markdown"&gt;</code> に書きます。HTML の中で字下げして書けるよう、<strong>共通の字下げは取り除きます</strong>。<code>value</code> プロパティ・<code>value</code> 属性でも渡せます（プロパティは 1 文字も変えずに読み込みます）。</li>
+  <li>値は <code>editor.value</code>（Markdown）。変更のたびに <code>input</code> イベントが発生し、<code>name</code> を付ければフォームでそのまま送信できます。</li>
+</ul>
+<h3>Lit のコンポーネントから使う</h3>
+<script type="text/plain" class="code" data-lang="js">
+  import { LitElement, html } from 'lit';
+  import '@hidemikimura/formulit-markdown';
+
+  class PostEditor extends LitElement {
+    static properties = { body: { state: true } };
+    constructor() { super(); this.body = '# タイトル\n\n本文'; }
+    render() {
+      return html`<formulit-markdown .value=${this.body}
+        @input=${(e) => (this.body = e.target.value)}></formulit-markdown>`;
+    }
+  }
+  customElements.define('post-editor', PostEditor);
+</script>
+<h3>ビルドなし（import map）で使う</h3>
+<script type="text/plain" class="code" data-lang="html">
+  <script type="importmap">
+  { "imports": {
+    "lit": "https://cdn.jsdelivr.net/npm/lit@3/index.js",
+    "lit/": "https://cdn.jsdelivr.net/npm/lit@3/",
+    "lit-html": "https://cdn.jsdelivr.net/npm/lit-html@3/lit-html.js",
+    "lit-html/": "https://cdn.jsdelivr.net/npm/lit-html@3/",
+    "lit-element/": "https://cdn.jsdelivr.net/npm/lit-element@4/",
+    "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/reactive-element.js",
+    "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/",
+    "markdown-it": "https://cdn.jsdelivr.net/npm/markdown-it@15/dist/browser/markdown-it.esm.min.mjs",
+    "@hidemikimura/formulit": "https://cdn.jsdelivr.net/npm/@hidemikimura/formulit@0.2/src/index.js",
+    "@hidemikimura/formulit-markdown": "https://cdn.jsdelivr.net/npm/@hidemikimura/formulit-markdown@0.1/src/index.js"
+  } }
+  <\/script>
+</script>
+<p><code>markdown-it</code> は、依存パッケージを含んだ 1 ファイル版（<code>dist/browser/markdown-it.esm.min.mjs</code>）を指定します。</p>
+
+<h2 id="preserve">原文の保持のしくみ</h2>
+<p>読み込むときに Markdown をトップレベルのブロック（見出し・段落・リスト・表・コード・引用・HTML ブロックなど）に分け、それぞれの原文を覚えておきます。書き出すときは次のように組み立てます。</p>
+<table>
+  <tr><th>ブロックの状態</th><th>書き出し</th></tr>
+  <tr><td>中身も属性も変わっていない</td><td>原文そのまま（前後の空行や参照定義 <code>[名前]: URL</code> も原文のまま）</td></tr>
+  <tr><td>中を編集した</td><td>そのブロックだけ Markdown に書き直す（リストは元の記号を使う）</td></tr>
+  <tr><td>新しく足した</td><td>Markdown に書き出す（文書で多く使われている記号・フェンスに合わせる）</td></tr>
+  <tr><td>削除した</td><td>書き出さない（前にあった参照定義は残す）</td></tr>
+</table>
+<p>元に戻すで編集前の状態に戻れば、書き出しも原文に戻ります。常に全体を書き直したい場合は <code>preserve-source="false"</code> にします。</p>
+
+<h2 id="input">入力</h2>
+<table>
+  <tr><th>入力</th><th>結果</th><th>入力</th><th>結果</th></tr>
+  <tr><td><code># </code> 〜 <code>###### </code></td><td>見出し</td><td><code>**文字**</code></td><td>太字</td></tr>
+  <tr><td><code>- </code> / <code>* </code> / <code>1. </code></td><td>リスト</td><td><code>*文字*</code></td><td>斜体</td></tr>
+  <tr><td><code>[] </code> / <code>[x] </code></td><td>ToDo</td><td><code>`文字`</code></td><td>コード</td></tr>
+  <tr><td><code>&gt; </code></td><td>引用</td><td><code>~~文字~~</code></td><td>取り消し線</td></tr>
+  <tr><td><code>```js </code></td><td>コードブロック</td><td><code>---</code></td><td>水平線</td></tr>
+</table>
+<p>行頭の <kbd>/</kbd> でコマンドメニュー、<kbd>{</kbd><kbd>{</kbd> で差し込み変数（<code>variables</code> 設定時）も使えます。</p>
+
+<h2 id="rules">書き出しの規則</h2>
+<table>
+  <tr><th>内容</th><th>Markdown</th></tr>
+  <tr><td>見出し</td><td><code># 見出し</code>（ATX 形式）</td></tr>
+  <tr><td>太字・斜体・取り消し線</td><td><code>**太字**</code> <code>*斜体*</code> <code>~~取消~~</code>。中身の端が「」などの記号のときは Markdown の規則で強調にならないため <code>&lt;strong&gt;</code> などの HTML</td></tr>
+  <tr><td>リスト</td><td>原文のリストはその記号（<code>-</code> <code>*</code> <code>+</code> / <code>.</code> <code>)</code>）。隣り合うリストは 1 つにつながらないよう記号を変える</td></tr>
+  <tr><td>ToDo</td><td><code>- [ ] 項目</code> / <code>- [x] 完了</code></td></tr>
+  <tr><td>コード</td><td>フェンス＋言語名（原文で <code>~~~</code> が多ければ <code>~~~</code>）</td></tr>
+  <tr><td>表</td><td>GFM の表（配置つき）。結合セル・セル内の段落・属性付きの表は HTML</td></tr>
+  <tr><td>画像</td><td><code>![代替テキスト](URL)</code>。キャプション・配置・サイズ付きは HTML</td></tr>
+  <tr><td>リンク</td><td><code>[文字](URL "タイトル")</code>、URL だけのものはそのまま。<code>target</code> などの属性付きは HTML</td></tr>
+  <tr><td>改行（<kbd>Shift</kbd>+<kbd>Enter</kbd>）</td><td>行末の <code>\</code></td></tr>
+  <tr><td>それ以外（文字色・下線・独自要素など）</td><td>HTML のまま（中の文字は Markdown で書く）</td></tr>
+</table>
+
+<h2 id="convert">変換だけ使う</h2>
+<p>エディタを置かずに、HTML と Markdown を変換する関数も使えます。</p>
+<div class="demo">
+  <div class="demo-head"><b>ライブデモ</b>左の HTML を編集すると、右に Markdown が出ます</div>
+  <div class="demo-body">
+    <div class="cols">
+      <div><h4>HTML</h4><textarea class="src" id="cv-src" spellcheck="false"></textarea></div>
+      <div><h4>htmlToMarkdown(html)</h4><pre class="out" id="cv-out" style="margin:0"></pre></div>
+    </div>
+  </div>
+</div>
+<script type="module" id="cv-script">
+  import { htmlToMarkdown } from '@hidemikimura/formulit-markdown';
+  const src = document.getElementById('cv-src');
+  const out = document.getElementById('cv-out');
+  src.value = `<h2>お知らせ</h2>
+<p><b>営業時間</b>を<a href="https://example.com">変更</a>します。<span style="color:red">重要</span></p>
+<ul><li>平日 9:00〜18:00</li><li>土日 <i>休み</i></li></ul>
+<table><thead><tr><th>曜日</th><th style="text-align:right">時間</th></tr></thead>
+<tbody><tr><td>月</td><td style="text-align:right">9-18</td></tr></tbody></table>`;
+  const run = () => { out.textContent = htmlToMarkdown(src.value); };
+  src.addEventListener('input', run);
+  run();
+</script>
+<script type="text/plain" class="code" data-lang="js">
+  import { markdownToHTML, htmlToMarkdown } from '@hidemikimura/formulit-markdown';
+
+  markdownToHTML('# 見出し\n\n- [x] 完了');  // GFM → HTML（ToDo は formulit の ToDo 形式）
+  htmlToMarkdown('<p><b>太字</b></p>');      // '**太字**'
+</script>
+
+<h2 id="api">設定と API</h2>
+<p><code>&lt;formulit-editor&gt;</code> の属性・プロパティ・メソッド・イベントはすべて使えます（<a href="api.html">API リファレンス</a>）。追加・変更点は次のとおりです。</p>
+<table>
+  <tr><th>名前</th><th>説明</th></tr>
+  <tr><td><code>value</code></td><td>Markdown（GFM）の文字列</td></tr>
+  <tr><td><code>toolbar</code></td><td>省略時は <code>MARKDOWN_TOOLBAR</code>（Markdown で表せる機能だけ）。<code>fontColor</code> などを加えると、その書式は HTML で残る</td></tr>
+  <tr><td><code>preserve-source</code></td><td>既定 <code>true</code>（触っていないブロックは原文のまま）。<code>"false"</code> で毎回全体を書き直す</td></tr>
+  <tr><td><code>markdownOptions</code></td><td>markdown-it のオプション（例: <code>{ linkify: false }</code>）</td></tr>
+  <tr><td><code>plain</code> 属性</td><td>本文の既定の見た目（引用の線・コードの背景・表の罫線など）を付けない</td></tr>
+  <tr><td><code>getSelectionMarkdown()</code></td><td>選択範囲の Markdown</td></tr>
+</table>
+<table>
+  <tr><th>export</th><th>説明</th></tr>
+  <tr><td><code>FormulitMarkdown</code></td><td>要素のクラス（<code>FormulitEditor</code> を継承）</td></tr>
+  <tr><td><code>MARKDOWN_TOOLBAR</code></td><td>既定のツールバー</td></tr>
+  <tr><td><code>markdownToHTML(md)</code> / <code>htmlToMarkdown(html)</code></td><td>変換</td></tr>
+  <tr><td><code>createMarkdownIt(options)</code></td><td>formulit-markdown と同じ設定の markdown-it</td></tr>
+  <tr><td><code>parseBlocks(md)</code></td><td>ブロックごとの HTML と原文</td></tr>
+  <tr><td><code>nodesToMarkdown(nodes, style)</code> / <code>detectStyle(md)</code></td><td>DOM ノードの書き出し / 原文の書き方（記号）の推定</td></tr>
+</table>
+
+<h2 id="vs">formulit との使い分け</h2>
+<table>
+  <tr><th></th><th><code>&lt;formulit-editor&gt;</code></th><th><code>&lt;formulit-markdown&gt;</code></th></tr>
+  <tr><td>保存形式</td><td>HTML</td><td>Markdown（GFM）</td></tr>
+  <tr><td>向いている用途</td><td>CMS・メール・手書き HTML を扱う画面</td><td>README・ドキュメント・ブログ・Git で管理する文章</td></tr>
+  <tr><td>書式</td><td>文字色・フォント・配置・表のセル結合などすべて</td><td>Markdown で表せるもの中心（ほかは HTML で残る）</td></tr>
+</table>
+</main>
+</body>
+</html>

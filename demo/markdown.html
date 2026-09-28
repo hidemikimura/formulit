@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>formulit-markdown デモ</title>
+<script type="importmap">
+{
+  "imports": {
+    "lit": "../node_modules/lit/index.js",
+    "lit/": "../node_modules/lit/",
+    "lit-html": "../node_modules/lit-html/lit-html.js",
+    "lit-html/": "../node_modules/lit-html/",
+    "lit-element/": "../node_modules/lit-element/",
+    "@lit/reactive-element": "../node_modules/@lit/reactive-element/reactive-element.js",
+    "@lit/reactive-element/": "../node_modules/@lit/reactive-element/",
+    "markdown-it": "../node_modules/markdown-it/dist/browser/markdown-it.esm.min.mjs",
+    "@hidemikimura/formulit": "../packages/formulit/src/index.js",
+    "@hidemikimura/formulit-markdown": "../packages/formulit-markdown/src/index.js"
+  }
+}
+</script>
+<style>
+  body { font: 15px/1.7 system-ui, sans-serif; margin: 0; background: #f6f7f9; color: #202124; }
+  main { max-width: 1280px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  h1 { grid-column: 1 / -1; margin: 0; font-size: 22px; }
+  h1 small { font-weight: 400; color: #5f6368; font-size: 14px; margin-left: 8px; }
+  formulit-markdown { background: #fff; }
+  .side { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .side b { font-size: 13px; }
+  .state { font-size: 12px; color: #5f6368; }
+  pre#out { margin: 0; background: #1f2328; color: #e6edf3; border-radius: 6px; padding: 12px 14px; font: 12.5px/1.6 ui-monospace, Menlo, monospace;
+    white-space: pre-wrap; word-break: break-word; min-height: 200px; }
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  button { font: inherit; font-size: 13px; padding: 4px 10px; border: 1px solid #c4c7c5; border-radius: 6px; background: #fff; cursor: pointer; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>formulit-markdown <small>見たまま編集して、Markdown（GFM）で保存</small></h1>
+  <formulit-markdown id="ed" word-count style="--formulit-min-height:480px">
+    <script type="text/markdown">
+      # formulit-markdown
+
+      Typora のように**見たまま**編集できる Markdown エディタです。*斜体*、~~取り消し~~、`コード`、[リンク](https://example.com)。
+
+      - 箇条書き
+        - 入れ子
+      - 行頭で `# ` や `- ` と入力すると変換されます
+
+      やること:
+
+      - [x] ToDo リスト
+      - [ ] クリックで完了
+
+      > 引用
+
+      ```js
+      const md = editor.value; // Markdown が返ります
+      ```
+
+      | 機能 | 対応 |
+      |:-----|:----:|
+      | 表   | ✓    |
+
+      Markdown で表せない書式は <span style="color: #d93025">HTML のまま</span>残ります。
+
+      [参照リンク]: https://github.com/hidemikimura/formulit
+    </script>
+  </formulit-markdown>
+  <div class="side">
+    <b>value（Markdown）</b>
+    <span class="state" id="state"></span>
+    <pre id="out"></pre>
+    <div class="btns">
+      <button type="button" id="reload">もう一度読み込む</button>
+      <button type="button" id="html">HTML を表示</button>
+    </div>
+  </div>
+</main>
+<script type="module">
+  import '@hidemikimura/formulit-markdown';
+  const ed = document.getElementById('ed');
+  const out = document.getElementById('out');
+  ed.variables = [{ type: 'group', label: '記事', variables: [{ label: 'タイトル', value: 'title' }, { label: '著者', value: 'author' }] }];
+  const show = () => {
+    out.textContent = ed.value;
+    document.getElementById('state').textContent = ed.dirty ? '編集済み：触ったブロックだけ書き直し、ほかは原文のまま' : '未編集：読み込んだ Markdown をそのまま返しています';
+  };
+  let t;
+  ed.addEventListener('input', () => { clearTimeout(t); t = setTimeout(show, 120); });
+  document.getElementById('reload').onclick = () => { ed.value = ed.value; show(); };
+  document.getElementById('html').onclick = () => { out.textContent = ed.editable.innerHTML; };
+  await customElements.whenDefined('formulit-markdown');
+  show();
+  window.ed = ed;
+</script>
+</body>
+</html>

@@ -54,28 +54,28 @@ const listConverter = {
 /* 編集領域（ライト DOM）用の最小限のスタイル。ページのスタイルが本文に効くよう、見た目の補助だけにとどめる */
 const lightSheet = new CSSStyleSheet();
 lightSheet.replaceSync(`
-  formulit-editor > .formulit-editable { display:block; position:relative; outline:none; box-sizing:border-box;
+  :is(formulit-editor, formulit-markdown) > .formulit-editable { display:block; position:relative; outline:none; box-sizing:border-box;
     min-height:var(--formulit-min-height,240px); padding:var(--formulit-padding,12px 16px); overflow-wrap:break-word; }
-  formulit-editor > .formulit-editable.formulit-empty::before { content:attr(data-placeholder); color:#9aa0a6;
+  :is(formulit-editor, formulit-markdown) > .formulit-editable.formulit-empty::before { content:attr(data-placeholder); color:#9aa0a6;
     position:absolute; pointer-events:none; }
-  formulit-editor > .formulit-editable td, formulit-editor > .formulit-editable th { outline:1px dashed #c4c7c5; outline-offset:-1px; min-width:2em; }
-  formulit-editor > .formulit-editable [data-formulit-selected] { outline:2px solid #1a73e8; outline-offset:1px; }
-  formulit-editor > .formulit-editable [contenteditable=false] { outline:1px dotted #9aa0a6; outline-offset:2px; }
-  formulit-editor > .formulit-editable img { max-width:100%; }
-  formulit-editor > .formulit-editable.formulit-painting { cursor:copy; }
-  formulit-editor > .formulit-editable [data-formulit-cell-selected] { background-color:rgb(26 115 232 / .14) !important; }
-  formulit-editor > .formulit-editable figure > figcaption:empty::before { content:'キャプションを入力'; color:#9aa0a6; }
-  formulit-editor > .formulit-editable img[data-formulit-uploading] { opacity:.5; }
-  formulit-editor > .formulit-editable pre > code[class*="language-"] { display:block; }
-  formulit-editor > .formulit-editable figure.media { position:relative; }
-  formulit-editor > .formulit-editable figure.media::after { content:''; position:absolute; inset:0; cursor:pointer; }
-  formulit-editor > .formulit-editable table > caption:empty::before { content:'表のタイトルを入力'; color:#9aa0a6; }
-  formulit-editor > .formulit-editable ul.todo-list > li > input[type=checkbox] { margin:0 .45em 0 -.2em; vertical-align:middle; cursor:pointer; }
-  formulit-editor > .formulit-editable ul.todo-list > li:has(> input[checked]) { text-decoration:line-through; color:#80868b; }
-  formulit-editor > .formulit-editable div.page-break { position:relative; clear:both; height:0; margin:1.6em 0; border-top:1px dashed #9aa0a6; }
-  formulit-editor > .formulit-editable div.page-break::after { content:'改ページ'; position:absolute; left:50%; top:-.75em; transform:translateX(-50%);
+  :is(formulit-editor, formulit-markdown) > .formulit-editable td, :is(formulit-editor, formulit-markdown) > .formulit-editable th { outline:1px dashed #c4c7c5; outline-offset:-1px; min-width:2em; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable [data-formulit-selected] { outline:2px solid #1a73e8; outline-offset:1px; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable [contenteditable=false] { outline:1px dotted #9aa0a6; outline-offset:2px; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable img { max-width:100%; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable.formulit-painting { cursor:copy; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable [data-formulit-cell-selected] { background-color:rgb(26 115 232 / .14) !important; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable figure > figcaption:empty::before { content:'キャプションを入力'; color:#9aa0a6; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable img[data-formulit-uploading] { opacity:.5; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable pre > code[class*="language-"] { display:block; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable figure.media { position:relative; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable figure.media::after { content:''; position:absolute; inset:0; cursor:pointer; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable table > caption:empty::before { content:'表のタイトルを入力'; color:#9aa0a6; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable ul.todo-list > li > input[type=checkbox] { margin:0 .45em 0 -.2em; vertical-align:middle; cursor:pointer; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable ul.todo-list > li:has(> input[checked]) { text-decoration:line-through; color:#80868b; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable div.page-break { position:relative; clear:both; height:0; margin:1.6em 0; border-top:1px dashed #9aa0a6; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable div.page-break::after { content:'改ページ'; position:absolute; left:50%; top:-.75em; transform:translateX(-50%);
     background:#fff; color:#80868b; font:11px/1.5 system-ui,sans-serif; padding:0 8px; border:1px solid #dadce0; border-radius:10px; }
-  formulit-editor > .formulit-editable nav.toc { border:1px solid #dadce0; border-radius:6px; padding:.4em 1em; background:#fafafa; cursor:default; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable nav.toc { border:1px solid #dadce0; border-radius:6px; padding:.4em 1em; background:#fafafa; cursor:default; }
 `);
 const styledRoots = new WeakSet();
 const highlightRules = new Set();
@@ -340,6 +340,9 @@ export class FormulitEditor extends LitElement {
   getHTML() { return this.value; }
   setHTML(v) { this.value = v; }
 
+  /** toolbar を設定しないときのツールバー（継承した要素で差し替えられる） */
+  get defaultToolbar() { return DEFAULT_TOOLBAR; }
+
   get mode() { return this._mode; }
   get dirty() { return this._dirty; }
 
@@ -523,7 +526,7 @@ export class FormulitEditor extends LitElement {
       }
       return null;
     };
-    const hit = find(this.toolbar ?? DEFAULT_TOOLBAR, 'group');
+    const hit = find(this.toolbar ?? this.defaultToolbar, 'group');
     if (!hit) return false;
     this._openDropdown = hit.top;
     this._openInner = hit.inner ?? null;
@@ -789,7 +792,7 @@ export class FormulitEditor extends LitElement {
   }
 
   _renderToolbar() {
-    return this._renderEntries(this._resolveEntries(this.toolbar ?? DEFAULT_TOOLBAR, 'group'));
+    return this._renderEntries(this._resolveEntries(this.toolbar ?? this.defaultToolbar, 'group'));
   }
 
   /**
@@ -1046,7 +1049,7 @@ export class FormulitEditor extends LitElement {
 
   _setContent(htmlString, { resetHistory }) {
     this._observer.disconnect();
-    const frag = load(htmlString, this.loadOptions());
+    const frag = this._loadContent(htmlString);
     this.editable.replaceChildren(frag);
     this._original = htmlString;
     // サニタイズで何か除去したら、原文ではなく除去後の DOM を value とする
@@ -1061,6 +1064,14 @@ export class FormulitEditor extends LitElement {
     this._updateEmpty();
     this._syncFormValue();
     this.requestUpdate();
+  }
+
+  /**
+   * 文字列を編集用の DocumentFragment にする（継承した要素で、HTML 以外の形式を読み込むために差し替えられる）。
+   * frag.formulitRemoved にサニタイズで除去した数を入れること。
+   */
+  _loadContent(text) {
+    return load(text, this.loadOptions());
   }
 
   _observe() {

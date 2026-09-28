@@ -335,6 +335,29 @@ function copyMeta(from, to) {
   if (m) meta.set(to, { ...m });
 }
 
+/* ================= 付加情報（拡張用） ================= */
+
+/**
+ * ノードに付加情報を持たせる。変更の追跡と undo/redo の複製（cloneWithMeta）に乗るので、
+ * 「読み込み時のどの範囲から来たノードか」などを覚えておくのに使える（formulit-markdown が使用）。
+ */
+export function setNodeData(node, data) {
+  const m = meta.get(node);
+  if (m) m.data = { ...m.data, ...data };
+  else meta.set(node, { data: { ...data }, attrDirty: false, contentDirty: false });
+}
+
+/** setNodeData で付けた情報（なければ undefined） */
+export function getNodeData(node) {
+  return meta.get(node)?.data;
+}
+
+/** 読み込み後に、そのノード自身・属性・子孫のどれも変更されていないか（対応情報のないノードは false） */
+export function isNodeUnchanged(node) {
+  const m = meta.get(node);
+  return !!m && !m.attrDirty && !m.contentDirty;
+}
+
 /* ================= 4. 書き出し ================= */
 
 /**

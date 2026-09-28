@@ -13,6 +13,7 @@ const inCode = (node) => !!(node.nodeType === 1 ? node : node.parentElement)?.cl
 
 /* ================= オートフォーマット ================= */
 
+const enterFrom = new WeakMap(); // editor → Enter の直前に抜け出す途中だった装飾の要素名
 const escapes = new WeakMap(); // editor → { el, after }：直前に作った装飾要素と、その直後のテキストノード
 
 /** カーソルが「装飾の直後」にあるか（ブラウザによっては装飾の末尾として扱われる） */
@@ -254,6 +255,11 @@ export const typingPlugin = {
   },
   init(ed) {
     const onBeforeInput = (e) => {
+      // 装飾を作った直後に Enter：ブラウザは装飾を次の行へ持ち越すので、あとで外す（onParagraph）
+      if (e.inputType === 'insertParagraph') {
+        const st = atEscape(ed);
+        if (st) enterFrom.set(ed, st.el.localName);
+      }
       if (e.inputType !== 'insertText' || !e.data || e.isComposing) { if (e.inputType !== 'insertText') escapes.delete(ed); return; }
       const st = atEscape(ed);
       escapes.delete(ed);
@@ -282,6 +288,27 @@ export const typingPlugin = {
         });
       });
     };
+    const onParagraph = (e) => {
+      const tag = enterFrom.get(ed);
+      enterFrom.delete(ed);
+      if (!tag || e.inputType !== 'insertParagraph') return;
+      const r = ed.getRange();
+      if (!r?.collapsed) return;
+      const block = closestBlock(r.startContainer, ed.editable);
+      for (let n = r.startContainer; n && n !== block && n !== ed.editable; n = n.parentNode) {
+        if (n.nodeType !== 1 || n.localName !== tag || n.textContent.replace(/\u200b/g, '')) continue;
+        ed.transact(() => {
+          const parent = n.parentNode;
+          const at = [...parent.childNodes].indexOf(n);
+          const kids = [...n.childNodes];
+          n.replaceWith(...kids);
+          if (!parent.firstChild) parent.append(document.createElement('br'));
+          ed.setCaretAt(parent, Math.min(at, parent.childNodes.length));
+        });
+        break;
+      }
+    };
+    ed.editable.addEventListener('input', onParagraph);
     ed.editable.addEventListener('beforeinput', onBeforeInput);
     ed.editable.addEventListener('compositionend', onCompositionEnd);
     const onInput = (e) => {
@@ -319,6 +346,7 @@ export const typingPlugin = {
     ed.editable.addEventListener('blur', onBlur);
     return () => {
       ed.editable.removeEventListener('beforeinput', onBeforeInput);
+      ed.editable.removeEventListener('input', onParagraph);
       ed.editable.removeEventListener('compositionend', onCompositionEnd);
       ed.editable.removeEventListener('input', onInput);
       ed.removeEventListener('formulit-selectionchange', onSel);

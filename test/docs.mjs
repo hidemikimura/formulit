@@ -35,17 +35,17 @@ for (const file of pages) {
   await page.waitForLoadState('networkidle');
   await page.waitForTimeout(300);
   const info = await page.evaluate(() => ({
-    editors: document.querySelectorAll('formulit-editor').length,
-    ready: [...document.querySelectorAll('formulit-editor')].filter((e) => e.shadowRoot?.querySelector('.toolbar')).length,
+    editors: document.querySelectorAll('formulit-editor, formulit-markdown').length,
+    ready: [...document.querySelectorAll('formulit-editor, formulit-markdown')].filter((e) => e.shadowRoot?.querySelector('.toolbar')).length,
     sidebar: !!document.querySelector('.sidebar a.on'),
-    empty: [...document.querySelectorAll('formulit-editor:not([data-empty])')].filter((e) => !e.editable?.textContent.trim() && !e.editable?.querySelector('img,table,hr')).map((e) => e.id || '(id なし)'),
+    empty: [...document.querySelectorAll(':is(formulit-editor, formulit-markdown):not([data-empty])')].filter((e) => !e.editable?.textContent.trim() && !e.editable?.querySelector('img,table,hr')).map((e) => e.id || '(id なし)'),
     leftovers: document.querySelectorAll('script.code[type="text/plain"]').length,
   }));
   // 各エディタに 1 文字入力できるか
   let typed = 0;
   for (let i = 0; i < info.editors; i++) {
     const ok = await page.evaluate(async (i) => {
-      const ed = document.querySelectorAll('formulit-editor')[i];
+      const ed = document.querySelectorAll('formulit-editor, formulit-markdown')[i];
       if (ed.readonly) return true;
       const before = ed.value;
       ed.focusEditor();

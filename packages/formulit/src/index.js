@@ -37,7 +37,9 @@ export { buildGrid } from './plugins/table.js';
 export {
   DEFAULT_VARIABLE_FORMAT, normalizeVariables, filterVariables, formatVariable, insertVariable,
 } from './plugins/variables.js';
-export { serializeWithSource, equivalentHTML, tokenize, buildSourceTree } from './core/source-map.js';
+export {
+  serializeWithSource, equivalentHTML, tokenize, buildSourceTree, setNodeData, getNodeData, isNodeUnchanged,
+} from './core/source-map.js';
 export {
   FormulitEditor, DEFAULT_TOOLBAR, COMPACT_TOOLBAR, cleanPastedHTML, stripCopiedStyles,
   registerPlugin, getPlugin, getPlugins, icons,

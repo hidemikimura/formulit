@@ -1,10 +1,14 @@
-// package.json の version をドキュメントサイトの表示（docs/assets/site.js）に反映する。
-// npm version <patch|minor|major> の実行時に自動で呼ばれる（package.json の "version" スクリプト）。
+// 各パッケージの version をドキュメントサイトの表示（docs/assets/site.js の VERSIONS）に反映する。
+// scripts/release.mjs から呼ばれる。単独では node scripts/sync-version.mjs
 import { readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { PACKAGES, pickPackage, root } from './packages.mjs';
 
-const root = new URL('..', import.meta.url);
-const { version } = JSON.parse(await readFile(new URL('package.json', root), 'utf8'));
-const file = new URL('docs/assets/site.js', root);
-const src = await readFile(file, 'utf8');
-await writeFile(file, src.replace(/const VERSION = '[^']*';/, `const VERSION = '${version}';`));
-console.log(`docs/assets/site.js を ${version} にしました`);
+const file = join(root, 'docs/assets/site.js');
+let src = await readFile(file, 'utf8');
+for (const key of Object.keys(PACKAGES)) {
+  const { pkg } = pickPackage(key);
+  src = src.replace(new RegExp(`('${key}': )'[^']*'`), `$1'${pkg.version}'`);
+  console.log(`docs/assets/site.js: ${key} = ${pkg.version}`);
+}
+await writeFile(file, src);

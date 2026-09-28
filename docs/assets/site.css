@@ -115,7 +115,7 @@ td code { white-space: nowrap; }
 .demo > .demo-head b { color: var(--ok); font-weight: 700; }
 .demo > .demo-head b::before { content: '● '; }
 .demo > .demo-body { padding: 14px; }
-.demo formulit-editor { background: #fff; }
+.demo formulit-editor, .demo formulit-markdown { background: #fff; }
 .demo .out { margin: 12px 0 0; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
   font: 12px/1.6 ui-monospace, Menlo, Consolas, monospace; white-space: pre-wrap; word-break: break-all; max-height: 260px; overflow: auto; color: #24292f; }
 .demo .out:empty::before { content: '（空）'; color: var(--muted); }

@@ -203,7 +203,7 @@ await test('暗黙の終了タグ・tbody 省略などを含んでも、出力�
     });
     await page.keyboard.type('Z');
     const ok = await page.evaluate(async () => {
-      const m = await import('/src/index.js');
+      const m = await import('/packages/formulit/src/index.js');
       return m.equivalentHTML(ed.value, m.serialize(ed.editable)) && ed.value.includes('Z');
     });
     assert(ok, `${d} → ${await val()}`);
@@ -219,7 +219,7 @@ await test('原文をつなぐと意味が変わる場合は通常のシリア�
 
 await test('ランダム編集（4 文書 × 最大 67 回）：出力は常に DOM と等価、かつ原文保持が働いている', async () => {
   const result = await page.evaluate(async () => {
-    const m = await import('/src/index.js');
+    const m = await import('/packages/formulit/src/index.js');
     let seed = 12345;
     const rnd = (n) => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed % n; };
     const docs = [
@@ -1073,6 +1073,22 @@ await test('スラッシュコマンド：行頭の / で一覧、絞り込み�
   assert((await val()).replace(/&nbsp;/g, ' ') === '<p>x /</p>', await val());
   await typeInP('<p>path</p>', '/');
   assert(await page.evaluate(() => !ed.shadowRoot.querySelector('.popup')), '語中の / では開かない');
+});
+
+await test('入力変換の直後に Enter しても、次の行に装飾（`code` など）を持ち越さない', async () => {
+  await typeInP('<p><br></p>', 'a `code`');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('next');
+  const out = (await val()).replace(/&nbsp;/g, ' ');
+  assert(out === '<p>a <code>code</code></p><p>next</p>', out);
+});
+
+await test('箇条書きの直後の段落で [] を入力しても、前のリストは ToDo にならない', async () => {
+  await setVal('<ul><li>a</li></ul><p>b</p>');
+  await placeCaret('p', 0);
+  await page.keyboard.type('[] ');
+  const out = await val();
+  assert(out === '<ul><li>a</li></ul><ul class="todo-list" style="list-style: none;"><li><input type="checkbox" disabled="">b</li></ul>', out);
 });
 
 await test('ToDo リスト：作成・クリックで完了・Enter で項目追加・空項目の Enter で抜ける', async () => {

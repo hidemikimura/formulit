@@ -13,7 +13,9 @@
   "lit-html": "./lib/vendor/lit-html/lit-html.js", "lit-html/": "./lib/vendor/lit-html/",
   "lit-element/": "./lib/vendor/lit-element/",
   "@lit/reactive-element": "./lib/vendor/@lit/reactive-element/reactive-element.js", "@lit/reactive-element/": "./lib/vendor/@lit/reactive-element/",
-  "@hidemikimura/formulit": "./lib/formulit/src/index.js"
+  "markdown-it": "./lib/vendor/markdown-it/markdown-it.js",
+  "@hidemikimura/formulit": "./lib/formulit/src/index.js",
+  "@hidemikimura/formulit-markdown": "./lib/formulit-markdown/src/index.js"
 } }
 </script>
 <script type="module" src="assets/site.js"></script>
@@ -85,6 +87,7 @@
   <tr><td><code>showPopup({ render, rect })</code> / <code>hidePopup()</code></td><td>キャレット付近のポップアップ</td></tr>
   <tr><td><code>setHighlight(key, ranges, css)</code></td><td>本文を変えずに範囲を強調</td></tr>
   <tr><td><code>closeDropdown()</code> / <code>loadOptions()</code></td><td>ドロップダウンを閉じる / <code>load()</code> 用オプション</td></tr>
+  <tr><td><code>defaultToolbar</code>（getter）</td><td><code>toolbar</code> 未設定時のツールバー。継承した要素で差し替える（<a href="markdown.html">formulit-markdown</a> が使用）</td></tr>
 </table>
 
 <h2 id="events">イベント</h2>
@@ -125,7 +128,7 @@
     linkPlugin, imagePlugin, embedPlugin, productivityPlugin, tablePlugin, variablesPlugin,
     // HTML 処理
     load, parseHTML, sanitize, serialize, restore, setTemp, cleanPastedHTML, stripCopiedStyles,
-    serializeWithSource, equivalentHTML,
+    serializeWithSource, equivalentHTML, setNodeData, getNodeData, isNodeUnchanged,
     // インライン書式・機能
     applyOps, removeFormatting, changeCase, insertImageFiles, uploadImage, matchMedia,
     toCodeBlock, toggleTodo, findMatches, getStats, saveNow, buildGrid,

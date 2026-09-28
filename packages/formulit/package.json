@@ -1,0 +1,53 @@
+{
+  "name": "@hidemikimura/formulit",
+  "version": "0.2.0",
+  "description": "Lit で使える、手書き HTML を欠落させない WYSIWYG エディタ（<formulit-editor>）",
+  "keywords": [
+    "wysiwyg",
+    "editor",
+    "rich-text",
+    "html-editor",
+    "lit",
+    "web-components",
+    "custom-elements",
+    "contenteditable",
+    "formulit"
+  ],
+  "homepage": "https://hidemikimura.github.io/formulit/",
+  "bugs": {
+    "url": "https://github.com/hidemikimura/formulit/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hidemikimura/formulit.git",
+    "directory": "packages/formulit"
+  },
+  "license": "MIT",
+  "author": "Hidemi Kimura",
+  "type": "module",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "./src/index.js"
+  ],
+  "files": [
+    "src",
+    "skills",
+    "CHANGELOG.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "release:check": "node ../../scripts/release-check.mjs",
+    "prepublishOnly": "node ../../scripts/release-check.mjs",
+    "release:notes": "node ../../scripts/release-notes.mjs"
+  },
+  "peerDependencies": {
+    "lit": "^3.0.0"
+  }
+}

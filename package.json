@@ -1,64 +1,26 @@
 {
-  "name": "@hidemikimura/formulit",
-  "version": "0.1.1",
-  "description": "Lit で使える、手書き HTML を欠落させない WYSIWYG エディタ（<formulit-editor>）",
-  "keywords": [
-    "wysiwyg",
-    "editor",
-    "rich-text",
-    "html-editor",
-    "lit",
-    "web-components",
-    "custom-elements",
-    "contenteditable",
-    "formulit"
-  ],
-  "homepage": "https://hidemikimura.github.io/formulit/",
-  "bugs": {
-    "url": "https://github.com/hidemikimura/formulit/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hidemikimura/formulit.git"
-  },
+  "name": "formulit-monorepo",
+  "private": true,
+  "description": "formulit（HTML 用）と formulit-markdown（Markdown 用）の WYSIWYG エディタ",
   "license": "MIT",
   "author": "Hidemi Kimura",
   "type": "module",
-  "main": "src/index.js",
-  "module": "src/index.js",
-  "exports": {
-    ".": "./src/index.js",
-    "./package.json": "./package.json"
-  },
-  "sideEffects": [
-    "./src/index.js"
+  "workspaces": [
+    "packages/*"
   ],
-  "files": [
-    "src",
-    "skills",
-    "CHANGELOG.md"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "start": "npx --yes http-server -c-1 -o /demo/ .",
     "test": "node test/run.mjs",
-    "test:all": "BROWSER=chromium node test/run.mjs && BROWSER=firefox node test/run.mjs && BROWSER=webkit node test/run.mjs",
+    "test:markdown": "node test/markdown.mjs",
+    "test:all": "for b in chromium firefox webkit; do BROWSER=$b node test/run.mjs && BROWSER=$b node test/markdown.mjs || exit 1; done",
     "perf": "node test/perf.mjs large",
     "docs:build": "node scripts/build-docs.mjs",
     "docs": "node scripts/build-docs.mjs && npx --yes http-server -c-1 -o / docs",
     "test:docs": "node test/docs.mjs",
-    "release:check": "node scripts/release-check.mjs",
-    "prepublishOnly": "npm run release:check",
-    "release:notes": "node scripts/release-notes.mjs",
-    "version": "node scripts/sync-version.mjs && git add docs/assets/site.js"
-  },
-  "peerDependencies": {
-    "lit": "^3.0.0"
+    "release": "node scripts/release.mjs"
   },
   "devDependencies": {
-    "playwright": "^1.63.0",
-    "lit": "^3.3.3"
+    "lit": "^3.3.3",
+    "playwright": "^1.63.0"
   }
 }

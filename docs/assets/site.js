@@ -3,12 +3,16 @@
 const PAGES = [
   { group: 'はじめに', items: [['index.html', '概要'], ['getting-started.html', 'インストールと基本'], ['playground.html', 'プレイグラウンド']] },
   { group: 'ガイド', items: [['configuration.html', '設定'], ['toolbar.html', 'ツールバー'], ['features.html', '機能一覧'], ['html-preservation.html', 'HTML 保持の仕組み']] },
+  { group: 'Markdown', items: [['markdown.html', 'Markdown エディタ']] },
   { group: '拡張', items: [['plugins.html', 'プラグインの作り方'], ['recipes.html', 'レシピ']] },
   { group: 'リファレンス', items: [['api.html', 'API リファレンス'], ['ai-skills.html', 'AI 用スキル']] },
 ];
-const VERSION = '0.1.1';
+// パッケージごとのバージョン（scripts/sync-version.mjs が更新する）
+const VERSIONS = { 'formulit': '0.2.0', 'formulit-markdown': '0.1.0' };
 
 const here = (location.pathname.split('/').pop() || 'index.html');
+const IS_MD = here.startsWith('markdown');
+const VERSION = IS_MD ? VERSIONS['formulit-markdown'] : VERSIONS.formulit;
 const flat = PAGES.flatMap((g) => g.items);
 
 function el(tag, attrs = {}, html = '') {
@@ -20,13 +24,14 @@ function el(tag, attrs = {}, html = '') {
 
 function buildChrome() {
   const header = el('header', { class: 'site-header' }, `
-    <a class="logo" href="index.html"><i>F</i>formulit</a><span class="ver">v${VERSION}</span>
+    <a class="logo" href="index.html"><i>F</i>${IS_MD ? 'formulit-markdown' : 'formulit'}</a><span class="ver">v${VERSION}</span>
     <nav>
       <a href="getting-started.html">ガイド</a>
       <a href="api.html">API</a>
       <a href="plugins.html">プラグイン</a>
       <a href="playground.html">プレイグラウンド</a>
       <a href="https://github.com/hidemikimura/formulit" rel="noopener">GitHub</a>
+      <a href="markdown.html">Markdown</a>
       <a href="https://www.npmjs.com/package/@hidemikimura/formulit" rel="noopener">npm</a>
     </nav>
     <button class="menu-btn" type="button" aria-label="メニュー">☰ メニュー</button>`);
@@ -69,7 +74,7 @@ function buildChrome() {
   }
 
   document.body.prepend(header);
-  document.body.append(el('footer', { class: 'site-footer' }, `formulit v${VERSION} — Lit で使える、手書き HTML を欠落させない WYSIWYG エディタ · <a href="https://github.com/hidemikimura/formulit">GitHub</a> · <a href="https://github.com/hidemikimura/formulit/blob/main/CHANGELOG.md">変更履歴</a> · MIT License © Hidemi Kimura`));
+  document.body.append(el('footer', { class: 'site-footer' }, `formulit v${VERSIONS.formulit} · formulit-markdown v${VERSIONS['formulit-markdown']} — Lit で使える WYSIWYG エディタ · <a href="https://github.com/hidemikimura/formulit">GitHub</a> · 変更履歴（<a href="https://github.com/hidemikimura/formulit/blob/main/packages/formulit/CHANGELOG.md">formulit</a> / <a href="https://github.com/hidemikimura/formulit/blob/main/packages/formulit-markdown/CHANGELOG.md">markdown</a>）· MIT License © Hidemi Kimura`));
   const title = main.querySelector('h1')?.textContent;
   if (title && here !== 'index.html') document.title = `${title} | formulit`;
 }

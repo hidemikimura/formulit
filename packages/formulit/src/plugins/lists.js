@@ -39,6 +39,26 @@ function ensureCheckbox(ed, li) {
   if (r?.collapsed && r.startContainer === li && r.startOffset === 0) ed.setCaretAt(li, 1);
 }
 
+/** ブロックの先頭から数えたカーソルの文字位置 */
+function caretOffsetIn(block, r) {
+  const pre = document.createRange();
+  pre.setStart(block, 0);
+  pre.setEnd(r.startContainer, r.startOffset);
+  return pre.toString().length;
+}
+
+/** 文字位置にカーソルを置く（テキストがなければ先頭） */
+function placeCaretAtOffset(ed, el, offset) {
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let t;
+  let left = offset;
+  while ((t = w.nextNode())) {
+    if (left <= t.length) { ed.setCaretAt(t, left); return; }
+    left -= t.length;
+  }
+  ed.setCaretAt(el, 0);
+}
+
 export function toggleTodo(ed, { checked = false } = {}) {
   ed.transact(() => {
     const cur = ed.closestAtSelection('ul.todo-list');
@@ -53,7 +73,23 @@ export function toggleTodo(ed, { checked = false } = {}) {
       unwrapListsFromParagraphs(ed);
       return;
     }
-    if (!ed.closestAtSelection('ul')) { document.execCommand('insertUnorderedList'); unwrapListsFromParagraphs(ed); }
+    if (!ed.closestAtSelection('ul')) {
+      const r = ed.getRange();
+      const block = r?.collapsed ? ed.closestAtSelection('p, h1, h2, h3, h4, h5, h6, div') : null;
+      if (block && block !== ed.editable && block.parentNode) {
+        // カーソルのある段落だけを ToDo にする（execCommand は隣のリストとつなげてしまうため自前で包む）
+        const offset = caretOffsetIn(block, r);
+        const ul = document.createElement('ul');
+        const li = document.createElement('li');
+        li.append(...block.childNodes);
+        ul.append(li);
+        block.replaceWith(ul);
+        placeCaretAtOffset(ed, li, offset);
+      } else {
+        document.execCommand('insertUnorderedList');
+        unwrapListsFromParagraphs(ed);
+      }
+    }
     const ul = ed.closestAtSelection('ul');
     if (!ul) return;
     ul.classList.add('todo-list');

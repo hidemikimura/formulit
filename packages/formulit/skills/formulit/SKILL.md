@@ -1,6 +1,6 @@
 ---
 name: formulit
-description: formulit（Lit 用 WYSIWYG エディタ <formulit-editor>）を組み込む・設定する・プラグインで拡張するときに使う。手書き HTML を欠落させない仕様、value と input イベント、ツールバー（グループ）、画像アップロード、自動保存、独自プラグインの正しい書き方を含む。
+description: formulit（Lit 用 WYSIWYG エディタ <formulit-editor>）と Markdown 版の formulit-markdown（<formulit-markdown>）を組み込む・設定する・プラグインで拡張するときに使う。手書き HTML を欠落させない仕様、value と input イベント、ツールバー（グループ）、画像アップロード、自動保存、独自プラグインの正しい書き方を含む。
 ---
 
 # formulit
@@ -16,6 +16,7 @@ description: formulit（Lit 用 WYSIWYG エディタ <formulit-editor>）を組�
 | 独自プラグイン（ボタン・セレクト・ドロップダウン・ショートカット等）の作り方 | [references/plugins.md](references/plugins.md) |
 | よくある実装例（Lit での双方向バインド、フォーム、画像アップロード、自動保存、CDN 等） | [references/recipes.md](references/recipes.md) |
 | HTML 保持の仕組みと、出力が変わるケース・トラブルシューティング | [references/html-preservation.md](references/html-preservation.md) |
+| Markdown で保存したい（`<formulit-markdown>`、`@hidemikimura/formulit-markdown`） | [references/markdown.md](references/markdown.md) |
 
 ## 最小の使い方
 
