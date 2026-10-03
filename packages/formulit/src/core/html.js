@@ -11,9 +11,9 @@
 
 import { attachSourceMap, markDirty } from './source-map.js';
 
-import { TMP_ATTR, setTemp, restoreElement } from './temp.js';
+import { TMP_ATTR, TEXT_ATTR, setTemp, restoreElement, unwrapTextElements } from './temp.js';
 
-export { TMP_ATTR };
+export { TMP_ATTR, TEXT_ATTR };
 
 /** 編集中に contenteditable=false を付けて丸ごと保護する要素 */
 export const DEFAULT_PROTECT =
@@ -75,8 +75,9 @@ export function prepareForEditing(root, { protect = DEFAULT_PROTECT } = {}) {
 
 export { setTemp };
 
-/** setTemp で行った変更を元に戻し、エディタ内部用の data-formulit-* を取り除く */
+/** setTemp で行った変更を元に戻し、編集中だけの要素を文字列に戻し、エディタ内部用の data-formulit-* を取り除く */
 export function restore(root) {
+  unwrapTextElements(root);
   root.querySelectorAll('*').forEach(restoreElement);
 }
 

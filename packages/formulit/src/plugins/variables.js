@@ -1,5 +1,6 @@
 import { html, nothing } from 'lit';
 import { icons } from '../icons.js';
+import { TEXT_ATTR } from '../core/temp.js';
 
 /**
  * 変数の挿入
@@ -15,7 +16,9 @@ import { icons } from '../icons.js';
  * - ツールバーの「変数」から、文字で絞り込めるコンボボックスで選んで挿入する
  * - 本文で "{{" と入力すると、キャレットの位置に同じ候補が出る（続けて入力すると絞り込み）
  * - 絞り込みの対象は グループ名・変数名・変数値（空白区切りで AND 検索、大文字小文字・全角半角・ひらがなカタカナを区別しない）
- * - 挿入するのはただの文字列（既定は "{{ product_name }}"）。書式は editor.variableFormat で変えられる
+ * - 書き出される（value / getHTML / ソース表示）のはただの文字列（既定は "{{ product_name }}"）。書式は editor.variableFormat で変えられる
+ * - エディタの中では変数名で表示する（"{{ 商品名 }}"）。読み込んだ本文のうち、一覧にある変数の書式に一致する部分も同じく表示する
+ *   （編集中だけの要素で、書き出し時は元の文字列に戻る）
  */
 
 export const DEFAULT_VARIABLE_FORMAT = Object.freeze({ open: '{{ ', close: ' }}' });
@@ -80,6 +83,95 @@ export function formatVariable(ed, variable) {
   return `${f.open ?? ''}${variable.value}${f.close ?? ''}`;
 }
 
+/** エディタの中での表示（"{{ 商品名 }}"） */
+export function variableDisplay(ed, variable) {
+  const f = ed.variableFormat;
+  const { open, close } = f && typeof f === 'object' ? f : DEFAULT_VARIABLE_FORMAT;
+  return `${open ?? ''}${variable.label}${close ?? ''}`;
+}
+
+/* ================= エディタの中での表示 ================= */
+
+const VAR_ATTR = 'data-formulit-variable';
+/** 変数として表示しない場所（コード・保護された要素の中など） */
+const SKIP = 'script, style, textarea, template, pre, code, [contenteditable=false]';
+
+const escapeRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/** 本文の文字列から変数を探すための { re, find(matchedText) } */
+function matcherOf(ed) {
+  const vars = flatten(groupsOf(ed)).map((x) => x.variable);
+  if (!vars.length) return null;
+  const f = ed.variableFormat ?? DEFAULT_VARIABLE_FORMAT;
+  if (typeof f === 'object' && (f.open ?? '').trim() && (f.close ?? '').trim()) {
+    // 区切りの内側の空白の有無は問わない（"{{name}}" も "{{ name }}" も同じ変数）
+    const byValue = new Map(vars.map((v) => [v.value.trim(), v]));
+    const open = escapeRe(f.open.trim());
+    const close = escapeRe(f.close.trim());
+    return {
+      re: new RegExp(`${open}\\s*((?:(?!${close})[^\\n])*?)\\s*${close}`, 'g'),
+      find: (m) => byValue.get(m[1].trim()),
+    };
+  }
+  // 書式が関数の場合は、挿入するときと同じ文字列だけを探す
+  const byText = new Map();
+  for (const v of vars) {
+    const t = formatVariable(ed, v);
+    if (t && !byText.has(t)) byText.set(t, v);
+  }
+  if (!byText.size) return null;
+  const alts = [...byText.keys()].sort((a, b) => b.length - a.length).map(escapeRe);
+  return { re: new RegExp(alts.join('|'), 'g'), find: (m) => byText.get(m[0]) };
+}
+
+/** 変数を表示する要素。書き出し時は text（"{{ product_name }}"）に戻る */
+function variableElement(ed, variable, text) {
+  const el = document.createElement('span');
+  el.setAttribute('contenteditable', 'false');
+  el.setAttribute(VAR_ATTR, variable.value);
+  el.setAttribute(TEXT_ATTR, text);
+  el.title = text;
+  el.textContent = variableDisplay(ed, variable);
+  return el;
+}
+
+/**
+ * root の中の変数の文字列を、変数名で表示する要素に置き換える（何度呼んでもよい）。
+ * 元のテキストノードは書き換えず新しいノードに差し替えるので、原文との対応情報は崩れない。
+ */
+export function decorateVariables(ed, root) {
+  const m = matcherOf(ed);
+  // 変数の一覧が変わった場合に備えて、表示済みの変数名を更新する
+  const byValue = new Map(flatten(groupsOf(ed)).map((x) => [x.variable.value, x.variable]));
+  root.querySelectorAll(`[${VAR_ATTR}]`).forEach((el) => {
+    const v = byValue.get(el.getAttribute(VAR_ATTR));
+    if (v && el.textContent !== variableDisplay(ed, v)) el.textContent = variableDisplay(ed, v);
+  });
+  if (!m) return;
+  const texts = [];
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    if (n.parentElement?.closest(SKIP)) continue;
+    m.re.lastIndex = 0;
+    if (m.re.test(n.data)) texts.push(n);
+  }
+  m.re.lastIndex = 0; // matchAll は lastIndex の位置から探すため
+  for (const n of texts) {
+    const out = [];
+    let last = 0;
+    for (const hit of n.data.matchAll(m.re)) {
+      const v = m.find(hit);
+      if (!v) continue;
+      if (hit.index > last) out.push(document.createTextNode(n.data.slice(last, hit.index)));
+      out.push(variableElement(ed, v, hit[0]));
+      last = hit.index + hit[0].length;
+    }
+    if (!out.length) continue;
+    if (last < n.data.length) out.push(document.createTextNode(n.data.slice(last)));
+    n.replaceWith(...out);
+  }
+}
+
 /** 本文で候補を出すきっかけの文字列（false で無効） */
 function triggerOf(ed) {
   const t = ed.variableTrigger;
@@ -97,7 +189,8 @@ export function insertVariable(ed, v) {
     : v;
   if (!variable) return;
   const text = formatVariable(ed, variable);
-  ed.transact(() => document.execCommand('insertText', false, text));
+  const el = variableElement(ed, variable, text);
+  ed.insertNodes(el);
   ed.dispatchEvent(new CustomEvent('formulit-variable-insert', { detail: { variable, text }, bubbles: true, composed: true }));
 }
 
@@ -291,6 +384,20 @@ export const variablesPlugin = {
     Enter: (ed) => (inlines.get(ed)?.flat.length ? (runInline(ed), true) : false),
     Tab: (ed) => (inlines.get(ed)?.flat.length ? (runInline(ed), true) : false),
     Escape: inlineKey((ed) => closeInline(ed)),
+  },
+  // 読み込み時に、本文の変数の文字列を変数名の表示にする
+  prepare(root, ed) {
+    if (ed) decorateVariables(ed, root);
+  },
+  // 本文を読み込んだ後に変数の一覧や書式を設定した場合も、表示を合わせる
+  updated(ed, changed) {
+    if (!changed.has('variables') && !changed.has('variableFormat')) return;
+    if (!ed.editable || ed.mode === 'source') return;
+    ed._onMutations(ed._observer.takeRecords()); // それまでの変更は通常どおり記録する
+    decorateVariables(ed, ed.editable);
+    // 見た目だけの変更（書き出す内容は変わらない）なので、変更として扱わない
+    ed._observer.takeRecords();
+    ed.history.amend();
   },
   init(ed) {
     ed.insertVariable = (v) => insertVariable(ed, v);

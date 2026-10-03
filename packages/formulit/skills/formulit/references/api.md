@@ -35,7 +35,7 @@ JS プロパティだけで渡すもの（`null` なら既定値）:
 | `autosave` | `async (html, editor) => {}`。失敗時は例外を投げる |
 | `slashCommands` | `[{ label, keywords, item?, run?(editor), needs? }]` または `false`（無効）。既定 `SLASH_COMMANDS` |
 | `variables` | `[{ type: 'group', label, variables: [{ label, value }] }]`（グループなしの `{ label, value }` も混在可）。未設定・空なら `variable` ボタンは非表示 |
-| `variableFormat` | `{ open, close }` または `(variable) => string`。既定 `{ open: '{{ ', close: ' }}' }` → `{{ product_name }}` |
+| `variableFormat` | `{ open, close }` または `(variable) => string`。既定 `{ open: '{{ ', close: ' }}' }` → `{{ product_name }}`（`value` に出る文字列。エディタの中では `open + label + close`＝`{{ 商品名 }}` と表示され、書き出し時に変数値の文字列に戻る） |
 | `variableTrigger` | 本文で変数候補を開く文字列。`null`（既定）なら `variableFormat.open.trim()`（関数なら `{{`）。`false` で無効 |
 
 読み取り専用:

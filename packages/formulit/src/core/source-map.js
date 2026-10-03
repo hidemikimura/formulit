@@ -14,7 +14,7 @@
  *       属性が変わった要素・新規  → ブラウザのシリアライズ
  *  5. 組み立てた結果をもう一度パースし、DOM と等価であることを確認する（呼び出し側）
  */
-import { restoreElement, INTERNAL_PREFIX } from './temp.js';
+import { restoreElement, INTERNAL_PREFIX, TEXT_ATTR } from './temp.js';
 
 /** node → { outer, start, end, attrDirty, contentDirty } */
 const meta = new WeakMap();
@@ -392,6 +392,8 @@ function serializeNode(n, ctx) {
   if (n.nodeType === 3) return { html: escapeText(n.data) };
   if (n.nodeType === 8) return { html: `<!--${n.data}-->` };
   if (n.nodeType !== 1) return { html: '' };
+  // 編集中だけの要素（変数の表示など）は、記録した文字列に戻す
+  if (n.hasAttribute(TEXT_ATTR)) return { html: escapeText(n.getAttribute(TEXT_ATTR)) };
 
   // 編集用の一時属性を戻した状態で考える
   if (OPAQUE.has(n.localName)) {

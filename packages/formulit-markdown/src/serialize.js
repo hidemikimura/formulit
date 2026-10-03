@@ -5,7 +5,7 @@
  * 表せないもの（文字色・下線・結合セル・属性付きの要素・独自要素など）は HTML のまま書き出す。
  * 書き出した結果をもう一度読み込むと同じ内容になることを優先し、迷うときは HTML を選ぶ。
  */
-import { restore } from '@hidemikimura/formulit';
+import { restore, TEXT_ATTR } from '@hidemikimura/formulit';
 
 const BLOCK = new Set([
   'address', 'article', 'aside', 'blockquote', 'details', 'dialog', 'dd', 'div', 'dl', 'dt', 'fieldset', 'figcaption',
@@ -342,6 +342,8 @@ function wrap(el, delim, tag, ctx) {
 }
 
 function inlineEl(el, ctx) {
+  // 編集中だけの要素（変数の表示など）は、記録した文字列に戻す
+  if (el.hasAttribute(TEXT_ATTR)) return escapeText(el.getAttribute(TEXT_ATTR), ctx);
   const name = el.localName;
   const plain = onlyAttrs(el);
   if (plain && (name === 'strong' || name === 'b')) return wrap(el, ctx.style.strong, 'strong', ctx);

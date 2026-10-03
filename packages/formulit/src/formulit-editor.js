@@ -63,6 +63,8 @@ lightSheet.replaceSync(`
   :is(formulit-editor, formulit-markdown) > .formulit-editable [data-formulit-selected] { outline:2px solid #1a73e8; outline-offset:1px; }
   :is(formulit-editor, formulit-markdown) > .formulit-editable [contenteditable=false] { outline:1px dotted #9aa0a6; outline-offset:2px; }
   :is(formulit-editor, formulit-markdown) > .formulit-editable img { max-width:100%; }
+  :is(formulit-editor, formulit-markdown) > .formulit-editable [data-formulit-variable] { outline:none; padding:0 .3em; margin:0 .05em;
+    border-radius:4px; background:rgb(26 115 232 / .12); color:#1a56c4; white-space:nowrap; cursor:default; }
   :is(formulit-editor, formulit-markdown) > .formulit-editable.formulit-painting { cursor:copy; }
   :is(formulit-editor, formulit-markdown) > .formulit-editable [data-formulit-cell-selected] { background-color:rgb(26 115 232 / .14) !important; }
   :is(formulit-editor, formulit-markdown) > .formulit-editable figure > figcaption:empty::before { content:'キャプションを入力'; color:#9aa0a6; }
@@ -494,7 +496,7 @@ export class FormulitEditor extends LitElement {
     return {
       sanitize: this.sanitize,
       protect: this.protect,
-      prepare: this._activePlugins().map((p) => p.prepare).filter(Boolean),
+      prepare: this._activePlugins().filter((p) => p.prepare).map((p) => (root) => p.prepare(root, this)),
     };
   }
 
@@ -748,6 +750,7 @@ export class FormulitEditor extends LitElement {
   }
 
   updated(changed) {
+    for (const p of this._activePlugins()) if (p.updated) safe(() => p.updated(this, changed));
     for (const key of ['_openDropdown', '_openInner']) {
       if (!changed.has(key)) continue;
       const prev = changed.get(key);

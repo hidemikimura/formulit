@@ -344,6 +344,19 @@ await test('差し込み変数を挿入できる（{{ title }}）', async () => 
   eq(await val(), 'Hi {{ title }}\n');
 });
 
+await test('差し込み変数は変数名で表示し、Markdown では変数値（読み込んだ本文も）', async () => {
+  await page.evaluate(() => { ed.variables = [{ label: 'タイトル', value: 'title' }]; });
+  await setVal('A {{title}} b\n');
+  const r = await page.evaluate(() => ed.editable.querySelector('[data-formulit-variable]')?.textContent);
+  eq(r, '{{ タイトル }}');
+  eq(await val(), 'A {{title}} b\n');
+  await typeAtEnd('p', '!');
+  eq(await val(), 'A {{title}} b!\n');
+  await page.evaluate(() => ed.insertVariable('title'));
+  eq(await val(), 'A {{title}} b!{{ title }}\n');
+  await page.evaluate(() => { ed.variables = null; });
+});
+
 console.log('組み込み');
 await test('<script type="text/markdown"> の初期値は共通の字下げを取って読み込む', async () => {
   const out = await page.evaluate(async () => {

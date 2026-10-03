@@ -4,6 +4,8 @@
  */
 export const TMP_ATTR = 'data-formulit-tmp';
 export const INTERNAL_PREFIX = 'data-formulit-';
+/** 編集中だけの要素。書き出し時は要素ごと、この属性の値の文字列に置き換える（変数の表示など） */
+export const TEXT_ATTR = 'data-formulit-text';
 const ORDER = '\u0000order';
 
 /**
@@ -41,4 +43,9 @@ export function restoreElement(el) {
     }
   }
   for (const a of [...el.attributes]) if (a.name.startsWith(INTERNAL_PREFIX)) el.removeAttribute(a.name);
+}
+
+/** TEXT_ATTR を持つ要素を、その値の文字列に置き換える */
+export function unwrapTextElements(root) {
+  root.querySelectorAll(`[${TEXT_ATTR}]`).forEach((el) => el.replaceWith(el.getAttribute(TEXT_ATTR)));
 }

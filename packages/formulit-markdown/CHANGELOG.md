@@ -2,6 +2,12 @@
 
 このパッケージ（`@hidemikimura/formulit-markdown`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
+## [Unreleased]
+
+### 変更
+
+- 差し込み変数をエディタの中では変数名（`{{ 商品名 }}`）で表示し、Markdown には変数値の文字列（`{{ product_name }}`）を書き出す（`@hidemikimura/formulit` の次の版が必要）。
+
 ## [0.1.0] - 2026-09-28
 
 最初の公開版です。`@hidemikimura/formulit` 0.2.0 以降が必要です。

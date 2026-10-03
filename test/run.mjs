@@ -1375,6 +1375,59 @@ await test('insertVariable() で挿入し、formulit-variable-insert を発火',
   await page.evaluate(() => { ed.variables = null; });
 });
 
+await test('本文では変数名で表示し、value（HTML・ソース表示）では変数値の文字列を返す', async () => {
+  await page.evaluate((v) => { ed.variables = v; }, VARS);
+  await typeInP('<p>e</p>', '');
+  await page.evaluate(() => ed.insertVariable('email'));
+  const shown = await page.evaluate(() => ed.editable.textContent);
+  assert(shown === 'e{{ メール }}', '表示: ' + shown);
+  assert(await val() === '<p>e{{ email }}</p>', await val());
+  // 変数の後ろで入力・Backspace で変数ごと消える
+  await page.keyboard.type('!');
+  assert(await val() === '<p>e{{ email }}!</p>', await val());
+  await page.keyboard.press('Backspace');
+  await page.keyboard.press('Backspace');
+  assert(await val() === '<p>e</p>', 'Backspace: ' + await val());
+  // ソース表示では変数値、戻すと再び変数名
+  await page.evaluate(() => ed.insertVariable('sku'));
+  const src = await page.evaluate(async () => { ed.toggleSource(true); await ed.updateComplete; const t = ed.shadowRoot.querySelector('textarea.source').value; ed.toggleSource(false); await ed.updateComplete; return t; });
+  assert(src === '<p>e{{ sku }}</p>', 'ソース: ' + src);
+  assert(await page.evaluate(() => ed.editable.textContent) === 'e{{ SKUコード }}', '戻した後の表示');
+  await page.evaluate(() => { ed.variables = null; });
+});
+
+await test('読み込んだ本文の変数も変数名で表示し、未編集・一部編集でも変数値の原文を保つ', async () => {
+  const src = '<p>{{sku}} と {{ unknown }}</p>\n<p class="x">{{  product_name }}<code>{{ sku }}</code></p>';
+  const r = await page.evaluate(async ([v, src]) => {
+    ed.variables = v;
+    ed.value = src;
+    await ed.updateComplete;
+    const shown = [...ed.editable.children].map((p) => p.textContent);
+    const first = ed.value;
+    ed.editable.lastElementChild.prepend('A');
+    await new Promise((r) => setTimeout(r));
+    return { shown, first, edited: ed.value };
+  }, [VARS, src]);
+  assert(r.shown[0] === '{{ SKUコード }} と {{ unknown }}', '表示: ' + r.shown[0]);
+  assert(r.shown[1] === '{{ 商品名 }}{{ sku }}', 'code の中は置き換えない: ' + r.shown[1]);
+  assert(r.first === src, '未編集: ' + r.first);
+  assert(r.edited === src.replace('<p class="x">', '<p class="x">A'), '一部編集: ' + r.edited);
+  await page.evaluate(() => { ed.variables = null; });
+});
+
+await test('本文の後に variables を設定しても変数名で表示し、変更扱いにしない', async () => {
+  const r = await page.evaluate(async (v) => {
+    ed.variables = null;
+    ed.value = '<p>Hi {{ customer_name }}</p>';
+    await ed.updateComplete;
+    ed.variables = v;
+    await ed.updateComplete;
+    return { shown: ed.editable.textContent, value: ed.value, dirty: ed.dirty };
+  }, VARS);
+  assert(r.shown === 'Hi {{ 氏名 }}' && r.value === '<p>Hi {{ customer_name }}</p>' && !r.dirty, JSON.stringify(r));
+  await page.evaluate(() => { ed.variables = null; });
+});
+
 console.log('接続前の設定');
 await test('ページに付ける前に設定した value が接続後も残る（form の reset でもその値に戻る）', async () => {
   const out = await page.evaluate(async () => {
