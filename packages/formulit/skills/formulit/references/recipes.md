@@ -143,7 +143,7 @@ formulit は ES モジュールのまま配布している。import map で `lit
   "lit-element/": "https://cdn.jsdelivr.net/npm/lit-element@4/",
   "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/reactive-element.js",
   "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/",
-  "@hidemikimura/formulit": "https://cdn.jsdelivr.net/npm/@hidemikimura/formulit@0.1/src/index.js"
+  "@hidemikimura/formulit": "https://cdn.jsdelivr.net/npm/@hidemikimura/formulit@0.3/src/index.js"
 } }
 </script>
 <script type="module">import '@hidemikimura/formulit';</script>

@@ -62,8 +62,8 @@ npm install @hidemikimura/formulit-markdown @hidemikimura/formulit lit
   "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/reactive-element.js",
   "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/",
   "markdown-it": "https://cdn.jsdelivr.net/npm/markdown-it@15/dist/browser/markdown-it.esm.min.mjs",
-  "@hidemikimura/formulit": "https://cdn.jsdelivr.net/npm/@hidemikimura/formulit@0.2/src/index.js",
-  "@hidemikimura/formulit-markdown": "https://cdn.jsdelivr.net/npm/@hidemikimura/formulit-markdown@0.1/src/index.js"
+  "@hidemikimura/formulit": "https://cdn.jsdelivr.net/npm/@hidemikimura/formulit@0.3/src/index.js",
+  "@hidemikimura/formulit-markdown": "https://cdn.jsdelivr.net/npm/@hidemikimura/formulit-markdown@0.2/src/index.js"
 } }
 </script>
 ```

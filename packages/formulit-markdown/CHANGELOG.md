@@ -2,11 +2,16 @@
 
 このパッケージ（`@hidemikimura/formulit-markdown`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
-## [Unreleased]
+## [0.2.0] - 2026-10-03
 
 ### 変更
 
-- 差し込み変数をエディタの中では変数名（`{{ 商品名 }}`）で表示し、Markdown には変数値の文字列（`{{ product_name }}`）を書き出す（`@hidemikimura/formulit` の次の版が必要）。
+- 差し込み変数をエディタの中では変数名（`{{ 商品名 }}`）で表示し、Markdown には変数値の文字列（`{{ product_name }}`）を書き出す。
+- 必要な `@hidemikimura/formulit` を 0.3.0 以降に変更（peerDependency `^0.3.0`）。
+
+### 動作確認
+
+- Chromium・Firefox・WebKit で自動テスト 48 項目（差し込み変数の表示と書き出し 1 項目を追加）に合格。
 
 ## [0.1.0] - 2026-09-28
 
@@ -27,4 +32,5 @@
 
 - Chromium・Firefox・WebKit で自動テスト 46 項目に合格（原文の保持、Markdown への書き出しの往復 23 例、入力変換・ツールバー・ToDo・ソース表示・貼り付け・コピー・フォーム・Lit）。
 
+[0.2.0]: https://github.com/hidemikimura/formulit/releases/tag/formulit-markdown-v0.2.0
 [0.1.0]: https://github.com/hidemikimura/formulit/releases/tag/formulit-markdown-v0.1.0

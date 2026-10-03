@@ -2,7 +2,7 @@
 
 このパッケージ（`@hidemikimura/formulit`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
-## [Unreleased]
+## [0.3.0] - 2026-10-03
 
 ### 変更
 
@@ -14,6 +14,10 @@
 
 - `data-formulit-text` 属性（`TEXT_ATTR`）：この属性を持つ要素は、書き出し時に要素ごと属性値の文字列に置き換わる（独自プラグインで「編集中だけの表示」を作る用）。
 - プラグインの `prepare(root, editor)` に editor を渡すようにした。プラグインに `updated(editor, changedProperties)` を追加（エディタのプロパティ変更時に呼ばれる）。
+
+### 動作確認
+
+- Chromium・Firefox・WebKit で自動テスト 111 項目（差し込み変数の表示と書き出し 3 項目を追加）と formulit-markdown の 48 項目に合格。
 
 ## [0.2.1] - 2026-09-28
 
@@ -94,6 +98,7 @@
 - Chromium・Firefox・WebKit の 3 エンジンで自動テスト 95 項目に合格。
 - macOS の Safari で ⌘ キーのショートカットと日本語入力の確定を手動で確認。
 
+[0.3.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.3.0
 [0.2.1]: https://github.com/hidemikimura/formulit/releases/tag/v0.2.1
 [0.2.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.2.0
 [0.1.1]: https://github.com/hidemikimura/formulit/releases/tag/v0.1.1
