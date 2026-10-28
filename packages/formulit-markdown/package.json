@@ -1,6 +1,6 @@
 {
   "name": "@hidemikimura/formulit-markdown",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "見たまま編集して Markdown（GFM）で保存する、Lit 製の WYSIWYG Markdown エディタ（<formulit-markdown>）",
   "keywords": [
     "markdown",
