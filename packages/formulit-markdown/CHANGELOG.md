@@ -2,6 +2,12 @@
 
 このパッケージ（`@hidemikimura/formulit-markdown`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
+## [Unreleased]
+
+### 追加
+
+- 本文の既定の見た目（見出しの下線・引用・コード・表・区切り線）にダークの配色を追加。ページの `color-scheme` がダークのときに切り替わる（エディタの UI は `@hidemikimura/formulit` のダークモードに従う）。
+
 ## [0.2.0] - 2026-10-03
 
 ### 変更

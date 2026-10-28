@@ -1627,6 +1627,63 @@ await test('シャドウ DOM の中：行頭の / でコマンドメニュー', 
 
 await page.evaluate(() => document.querySelector('shadow-host-test').remove());
 
+console.log('ダークモード');
+const colors = () => page.evaluate(() => {
+  const sr = ed.shadowRoot;
+  const cs = (el) => getComputedStyle(el);
+  const btn = sr.querySelector('.toolbar button');
+  return {
+    host: cs(ed).backgroundColor,
+    toolbar: cs(sr.querySelector('.toolbar')).backgroundColor,
+    button: cs(btn).color,
+    placeholderVar: cs(ed.editable).getPropertyValue('--_fl-hint').trim(),
+  };
+});
+const isDark = (rgb) => { const [r, g, b] = rgb.match(/\d+/g).map(Number); return (r + g + b) / 3 < 100; };
+
+await test('既定（ページに color-scheme の指定なし）はライト', async () => {
+  const c = await colors();
+  assert(!isDark(c.host) && !isDark(c.toolbar) && isDark(c.button), JSON.stringify(c));
+});
+
+await test('theme="dark" でダーク、theme="light" でページがダークでもライト', async () => {
+  await page.evaluate(() => { ed.theme = 'dark'; });
+  await page.evaluate(() => ed.updateComplete);
+  const d = await colors();
+  assert(await page.evaluate(() => ed.getAttribute('theme')) === 'dark', '属性に反映されない');
+  assert(isDark(d.host) && isDark(d.toolbar) && !isDark(d.button), 'dark: ' + JSON.stringify(d));
+  await page.evaluate(() => { document.documentElement.style.colorScheme = 'dark'; ed.theme = 'light'; });
+  await page.evaluate(() => ed.updateComplete);
+  const l = await colors();
+  assert(!isDark(l.host) && isDark(l.button), 'light: ' + JSON.stringify(l));
+  await page.evaluate(() => { document.documentElement.style.colorScheme = ''; ed.theme = null; ed.removeAttribute('theme'); });
+});
+
+await test('ページが color-scheme: dark ならダーク（ドロップダウン・本文の補助表示も）', async () => {
+  await page.evaluate(() => { document.documentElement.style.colorScheme = 'dark'; });
+  const c = await colors();
+  assert(isDark(c.host) && !isDark(c.button), JSON.stringify(c));
+  await click('fontColor');
+  const panel = await page.evaluate(() => getComputedStyle(ed.shadowRoot.querySelector('.panel')).backgroundColor);
+  await page.keyboard.press('Escape');
+  assert(isDark(panel), 'panel: ' + panel);
+  await page.evaluate(() => { document.documentElement.style.colorScheme = ''; });
+});
+
+await test('--formulit-bg などの CSS 変数はダークでも優先し、value は配色で変わらない', async () => {
+  const r = await page.evaluate(async () => {
+    ed.value = '<p>a</p>';
+    ed.theme = 'dark';
+    ed.style.setProperty('--formulit-bg', 'rgb(1, 2, 3)');
+    await ed.updateComplete;
+    const bg = getComputedStyle(ed).backgroundColor;
+    ed.style.removeProperty('--formulit-bg');
+    ed.removeAttribute('theme');
+    return { bg, value: ed.value };
+  });
+  assert(r.bg === 'rgb(1, 2, 3)' && r.value === '<p>a</p>', JSON.stringify(r));
+});
+
 console.log('フォーム連携');
 await test('form の FormData に value が入る・reset で初期値に戻る', async () => {
   await setVal('<p>form</p>');

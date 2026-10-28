@@ -10,6 +10,7 @@
 | `value` | `value` | 文字列 | HTML。属性は初期値のみ。以後はプロパティで読み書き（プロパティに設定した文字列は 1 文字も変えずに保持） |
 | `placeholder` | `placeholder` | `''` | 空のときの表示 |
 | `readonly` | `readonly` | `false` | 読み取り専用（フォームの `disabled` でも有効になる） |
+| `theme` | `theme` | `null` | 配色。`'light'` / `'dark'` で固定。`null` ならページの `color-scheme` に従う（指定のないページはライト） |
 | `toolbar` | `toolbar` | `null`（= `DEFAULT_TOOLBAR`） | 属性は空白区切りの項目名。グループはプロパティ（配列）で |
 | `plugins` | `plugins` | `null`（= 登録済みすべて） | 有効にするプラグイン名（空白区切り / 配列） |
 | `sanitize` | `sanitize` | `'strip'` | `'strip'`: script / on* / javascript: を除去。`'none'`: 除去せず編集中だけ無効化し出力に残す |
@@ -117,7 +118,7 @@ JS プロパティだけで渡すもの（`null` なら既定値）:
 
 ## 見た目の調整
 
-CSS 変数（ホスト要素に指定）: `--formulit-min-height`（240px）、`--formulit-padding`（12px 16px）、`--formulit-border`、`--formulit-radius`、`--formulit-bg`、`--formulit-toolbar-bg`、`--formulit-fullscreen-width`（860px）。
+CSS 変数（ホスト要素に指定）: `--formulit-min-height`（240px）、`--formulit-padding`（12px 16px）、`--formulit-border`、`--formulit-radius`、`--formulit-bg`、`--formulit-toolbar-bg`、`--formulit-surface`（ドロップダウン・ダイアログ）、`--formulit-text`（UI の文字）、`--formulit-muted`、`--formulit-accent`、`--formulit-fullscreen-width`（860px）。
 
 `::part()`: `toolbar`、`body`、`source`（HTML ソースの textarea）、`status`（ステータスバー）。
 

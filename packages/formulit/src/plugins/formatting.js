@@ -91,7 +91,7 @@ function toHex(v) {
 const colorIcon = (base, prop) => (ed) => {
   const c = ed.inlineStyleAt(prop);
   return html`<span style="display:inline-flex;flex-direction:column;align-items:center;line-height:0">
-    ${base}<span style="display:block;width:16px;height:3px;margin-top:-1px;border-radius:1px;background:${c || (prop === 'color' ? '#202124' : 'transparent')};border:${c ? 0 : '1px solid #bbb'}"></span>
+    ${base}<span style="display:block;width:16px;height:3px;margin-top:-1px;border-radius:1px;background:${c || (prop === 'color' ? 'var(--_fl-text-strong)' : 'transparent')};border:${c ? 0 : '1px solid #bbb'}"></span>
   </span>`;
 };
 

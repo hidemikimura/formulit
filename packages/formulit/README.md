@@ -79,6 +79,7 @@ html`<formulit-editor .value=${this.body} @input=${(e) => (this.body = e.target.
 | `placeholder` | 空のときの表示 |
 | `preserve-source` | 編集後も未変更部分を原文のまま返す（既定 `true`。`preserve-source="false"` で無効） |
 | `readonly` | 読み取り専用 |
+| `theme` | 配色。`light` / `dark` で固定。未指定ならページの `color-scheme` に従う（下記「ダークモード」） |
 | `word-count` | ステータスバーに文字数（空白を除く文字数）と単語数を表示 |
 | `max-chars` | 文字数の上限。「123 / 2,000 文字」の形で表示し、超えると赤字 |
 | `autosave-delay` | 自動保存までの待ち時間（ミリ秒、既定 2000） |
@@ -106,7 +107,17 @@ html`<formulit-editor .value=${this.body} @input=${(e) => (this.body = e.target.
 
 イベント: `input`（変更のたび）、`change`（フォーカスが外れたとき）、`formulit-mode`（ソース表示の切替）、`formulit-upload` / `formulit-upload-error`（画像アップロードの完了・失敗。`detail.file` / `detail.url` / `detail.error`）、`formulit-autosave` / `formulit-autosave-error`、`formulit-fullscreen`、`formulit-variable-insert`（変数の挿入。`detail.variable` / `detail.text`）
 
-CSS カスタムプロパティ: `--formulit-min-height` `--formulit-padding` `--formulit-border` `--formulit-radius` `--formulit-bg` `--formulit-toolbar-bg`、`::part(toolbar)` `::part(source)`
+CSS カスタムプロパティ: `--formulit-min-height` `--formulit-padding` `--formulit-border` `--formulit-radius` `--formulit-bg` `--formulit-toolbar-bg` `--formulit-surface`（ドロップダウン・ダイアログの背景） `--formulit-text`（ボタンなどの文字） `--formulit-muted`（補足の文字） `--formulit-accent`（フォーカス・選択の色）、`::part(toolbar)` `::part(source)`
+
+#### ダークモード
+
+ツールバー・ドロップダウン・ダイアログ・本文の補助表示（プレースホルダー、表の枠、変数の表示など）は、ライトとダークの配色を持っています。
+
+- 既定ではページの `color-scheme` に従います。`:root { color-scheme: light dark; }` のページなら OS の設定で切り替わり、指定のないページでは従来どおりライトです。
+- `theme="dark"` / `theme="light"` で固定できます（`editor.theme = 'dark'` も可）。固定したときは文字色も配色に合わせます。
+- 上の CSS 変数はどちらの配色でも優先されます（ダークのときだけ変えるなら `@media (prefers-color-scheme: dark)` の中で指定）。
+- `light-dark()` に対応していないブラウザ（Safari 17.4 以前など）ではライトの配色になります。
+- 本文の文字色はページから受け継ぎます。ダークのページでは、本文の文字色もページ側で明るくしてください。
 
 ## 機能一覧
 

@@ -2,6 +2,18 @@
 
 このパッケージ（`@hidemikimura/formulit`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
+## [Unreleased]
+
+### 追加
+
+- **ダークモード**：ツールバー・ドロップダウン・ダイアログ・本文の補助表示（プレースホルダー・表の枠・変数の表示・検索の強調など）にダークの配色を追加。既定ではページの `color-scheme` に従う（`color-scheme: light dark` のページなら OS の設定で切り替わり、指定のないページは従来どおりライト）。
+- `theme` 属性・プロパティ：`light` / `dark` で配色を固定。
+- CSS 変数 `--formulit-surface`・`--formulit-text`・`--formulit-muted`・`--formulit-accent`。
+
+### 変更
+
+- UI の固定色を CSS 変数にまとめた（`light-dark()` に対応していないブラウザではライトの配色）。
+
 ## [0.3.0] - 2026-10-03
 
 ### 変更

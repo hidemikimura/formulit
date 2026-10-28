@@ -57,7 +57,7 @@ export const icons = {
   colLeft: icon(svg`<rect x="11" y="3" width="10" height="18" rx="1.5"/><path d="M16 3v18M2 12h6M5 9v6"/>`),
   headerRow: icon(svg`<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 10h18"/><path d="M4 5h16v4H4z" fill="currentColor" stroke="none" opacity=".45"/>`),
   headerCol: icon(svg`<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M9 4v16"/><path d="M4 5h4v14H4z" fill="currentColor" stroke="none" opacity=".45"/>`),
-  tableProps: icon(svg`<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 10h18M9 4v16"/><circle cx="17" cy="16" r="3" fill="#fff"/>`),
+  tableProps: icon(svg`<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 10h18M9 4v16"/><circle cx="17" cy="16" r="3" style="fill:var(--_fl-surface)"/>`),
   cellProps: icon(svg`<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 10h18M3 15h18M9 4v16M15 4v16"/><path d="M9.5 10.5h5v4h-5z" fill="currentColor" stroke="none" opacity=".45"/>`),
   find: icon(svg`<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>`),
   fullscreen: icon(svg`<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>`),

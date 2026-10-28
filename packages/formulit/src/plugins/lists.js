@@ -165,7 +165,7 @@ function setListStyle(ed, list, type) {
 
 function listStylePanel(ed, close) {
   const list = listAt(ed);
-  if (!list) return html`<div style="padding:6px;color:#5f6368">リストの中にカーソルを置いてください</div>`;
+  if (!list) return html`<div style="padding:6px;color:var(--_fl-muted)">リストの中にカーソルを置いてください</div>`;
   const types = list.localName === 'ol' ? OL_TYPES : UL_TYPES;
   const cur = list.style.listStyleType;
   return html`<div class="menu">

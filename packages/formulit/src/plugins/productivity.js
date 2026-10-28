@@ -83,7 +83,7 @@ function refreshFind(ed, { keepIndex = true, fromCaret = false } = {}) {
 function paintFind(ed) {
   const st = findState(ed);
   const cur = st.matches[st.index];
-  ed.setHighlight('find', st.matches.filter((m) => m !== cur), 'background-color: #fde68a; color: inherit;');
+  ed.setHighlight('find', st.matches.filter((m) => m !== cur), 'background-color: light-dark(#fde68a, #6b5300); color: inherit;');
   ed.setHighlight('find-current', cur ? [cur] : [], 'background-color: #f59e0b; color: #fff;');
   ed.requestUpdate();
 }
@@ -152,11 +152,11 @@ function findPanel(ed) {
   const count = st.query ? (st.matches.length ? `${st.index + 1} / ${st.matches.length} 件` : '見つかりません') : '';
   return html`<div class="find" style="width:300px;display:flex;flex-direction:column;gap:6px">
     <input name="find" type="search" placeholder="検索" aria-label="検索" .value=${st.query} @input=${onQuery} @keydown=${keys}
-      style="height:28px;border:1px solid #c4c7c5;border-radius:4px;padding:0 8px;font:inherit">
+      style="height:28px;border:1px solid var(--_fl-input-border);border-radius:4px;padding:0 8px;font:inherit;background:var(--_fl-input-bg);color:inherit">
     <input name="replace" type="text" placeholder="置換後の文字列" aria-label="置換後の文字列" .value=${st.replacement}
       @input=${(e) => { st.replacement = e.target.value; }}
       @keydown=${(e) => { if (e.key === 'Enter') { e.preventDefault(); replaceOne(ed); } }}
-      style="height:28px;border:1px solid #c4c7c5;border-radius:4px;padding:0 8px;font:inherit">
+      style="height:28px;border:1px solid var(--_fl-input-border);border-radius:4px;padding:0 8px;font:inherit;background:var(--_fl-input-bg);color:inherit">
     <div style="display:flex;gap:12px;font-size:12px">
       <label><input type="checkbox" name="matchCase" .checked=${st.matchCase}
         @change=${(e) => { st.matchCase = e.target.checked; refreshFind(ed, { fromCaret: true }); }}> 大文字と小文字を区別</label>
@@ -168,7 +168,7 @@ function findPanel(ed) {
       <button data-find="next" title="次へ (Enter)" @click=${() => step(ed, 1)}>▼ 次へ</button>
       <button data-find="replace" @click=${() => replaceOne(ed)}>置換</button>
       <button data-find="replaceAll" @click=${() => replaceAll(ed)}>すべて置換</button>
-      <span data-find="count" style="margin-left:auto;font-size:12px;color:#5f6368">${st.lastReplaced ? `${st.lastReplaced} 件置換しました` : count}</span>
+      <span data-find="count" style="margin-left:auto;font-size:12px;color:var(--_fl-muted)">${st.lastReplaced ? `${st.lastReplaced} 件置換しました` : count}</span>
     </div>
   </div>`;
 }
