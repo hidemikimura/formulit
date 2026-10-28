@@ -2,7 +2,7 @@
 
 このパッケージ（`@hidemikimura/formulit`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
-## [Unreleased]
+## [0.4.0] - 2026-10-28
 
 ### 追加
 
@@ -13,6 +13,10 @@
 ### 変更
 
 - UI の固定色を CSS 変数にまとめた（`light-dark()` に対応していないブラウザではライトの配色）。
+
+### 動作確認
+
+- Chromium・Firefox・WebKit で自動テスト 115 項目（ダークモード 4 項目を追加）と formulit-markdown の 48 項目に合格。
 
 ## [0.3.0] - 2026-10-03
 
@@ -110,6 +114,7 @@
 - Chromium・Firefox・WebKit の 3 エンジンで自動テスト 95 項目に合格。
 - macOS の Safari で ⌘ キーのショートカットと日本語入力の確定を手動で確認。
 
+[0.4.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.4.0
 [0.3.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.3.0
 [0.2.1]: https://github.com/hidemikimura/formulit/releases/tag/v0.2.1
 [0.2.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.2.0
