@@ -419,10 +419,24 @@ await test('ツールバーのインデント・インデント解除（複数�
     ed.focusEditor();
     const r = document.createRange(); r.setStart(lis[1].firstChild, 0); r.setEnd(lis[2].firstChild, 1); ed.selectRange(r);
   });
-  await click('indent');
+  await click('listIndent');
   eq(await val(), '- a\n  - b\n  - c\n');
-  await click('outdent');
+  await click('listOutdent');
   eq(await val(), '- a\n- b\n- c\n');
+});
+
+await test('リストの外の段落では入れ子のボタンは押せず、HTML も引用も混ざらない', async () => {
+  await setVal('para\n');
+  await caret('p', 2);
+  await page.waitForFunction(() => ed.shadowRoot.querySelector('button[data-item="listIndent"]')?.disabled);
+  const state = await page.evaluate(() => ({
+    indent: ed.shadowRoot.querySelector('button[data-item="listIndent"]')?.disabled,
+    outdent: ed.shadowRoot.querySelector('button[data-item="listOutdent"]')?.disabled,
+    plain: !!ed.shadowRoot.querySelector('button[data-item="indent"]'),
+  }));
+  if (!state.indent || !state.outdent || state.plain) throw new Error(JSON.stringify(state));
+  await page.keyboard.press('Tab');
+  eq(await val(), 'para\n');
 });
 
 console.log('組み込み');

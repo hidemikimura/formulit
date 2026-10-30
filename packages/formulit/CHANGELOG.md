@@ -2,6 +2,12 @@
 
 このパッケージ（`@hidemikimura/formulit`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
+## [Unreleased]
+
+### 追加
+
+- ツールバー項目 `listIndent` / `listOutdent`：リストの中だけで動くインデント・インデント解除（リストの外では押せない。段落の字下げはしない）。
+
 ## [0.5.0] - 2026-10-30
 
 ### 追加

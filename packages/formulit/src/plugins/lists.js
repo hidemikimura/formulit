@@ -2,7 +2,9 @@ import { html, nothing } from 'lit';
 import { icons } from '../icons.js';
 import { setTemp } from '../core/html.js';
 import { unwrapListsFromParagraphs } from './basic.js';
-import { listIndentKeymap } from './list-indent.js';
+import {
+  listIndentKeymap, listItemsAtSelection, indentListItems, outdentListItems,
+} from './list-indent.js';
 
 /**
  * ToDo リスト、リストの種類（記号・番号の種類、開始番号、逆順）、改ページ、目次。
@@ -298,6 +300,17 @@ export const listsPlugin = {
       type: 'dropdown', title: 'リストの種類・開始番号', icon: icons.listStyle,
       enabled: (ed) => !!listAt(ed),
       panel: listStylePanel,
+    },
+    // リストの中だけで動くインデント（段落の字下げはしない。Markdown 版の既定）
+    listIndent: {
+      icon: icons.indent, title: 'リストを入れ子にする (Tab)',
+      action: (ed) => indentListItems(ed),
+      enabled: (ed) => !!listItemsAtSelection(ed),
+    },
+    listOutdent: {
+      icon: icons.outdent, title: 'リストの入れ子を戻す (Shift+Tab)',
+      action: (ed) => outdentListItems(ed),
+      enabled: (ed) => listItemsAtSelection(ed)?.list.parentElement?.localName === 'li',
     },
     pageBreak: { icon: icons.pageBreak, title: '改ページ（印刷時）', action: (ed) => ed.insertNodes(pageBreakElement()) },
     toc: { icon: icons.toc, title: '目次を挿入（見出しから自動生成）', action: insertToc },

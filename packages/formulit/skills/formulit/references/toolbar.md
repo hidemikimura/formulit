@@ -46,7 +46,7 @@ ed.toolbar = [
 | 履歴・検索 | `undo` `redo` `findReplace` |
 | 段落 | `format`（本文・見出し1〜4・整形済み のセレクト）`styles`（`formatStyles` 設定時のみ表示）`lineHeight` `alignLeft` `alignCenter` `alignRight` `indent` `outdent` `quote` |
 | 文字 | `bold` `italic` `underline` `strike` `sup` `sub` `code` `fontFamily` `fontSize` `fontColor` `bgColor` `painter`（書式のコピー）`caseChange` `specialChars` `clear` |
-| リスト | `ul` `ol` `todoList` `listStyle` |
+| リスト | `ul` `ol` `todoList` `listStyle` `listIndent` `listOutdent`（リストの中だけで動くインデント・解除。`indent` `outdent` はリストの外では段落を字下げする） |
 | 挿入 | `link` `unlink` `image` `table` `mediaEmbed` `codeBlock` `htmlEmbed` `hr` `pageBreak` `toc` `variable`（差し込み変数。`variables` 設定時のみ表示） |
 | 表示・その他 | `source` `fullscreen` `shortcuts` |
 

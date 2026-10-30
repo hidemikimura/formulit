@@ -2,6 +2,12 @@
 
 このパッケージ（`@hidemikimura/formulit-markdown`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
+## [Unreleased]
+
+### 修正
+
+- 既定のツールバーの「インデント」をリストの外の段落で押すと、Chromium・Safari では `<blockquote style="margin: 0 0 0 40px; …">` の HTML が Markdown に混ざり、Firefox では段落が引用（`>`）になっていた。既定のツールバーを、リストの中だけで動く `listIndent` / `listOutdent` に変更（リストの外では押せない）。`@hidemikimura/formulit` の次の版が必要。
+
 ## [0.3.0] - 2026-10-30
 
 ### 追加

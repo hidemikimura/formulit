@@ -8,7 +8,7 @@ export const MARKDOWN_TOOLBAR = [
   'undo', 'redo', 'findReplace', '|',
   'format', '|',
   'bold', 'italic', 'strike', 'code', '|',
-  'ul', 'ol', 'todoList', 'outdent', 'indent', '|',
+  'ul', 'ol', 'todoList', 'listOutdent', 'listIndent', '|',
   'link', 'unlink', 'image', 'table', 'codeBlock', 'quote', 'hr', 'variable', '|',
   'source', 'fullscreen', 'shortcuts',
 ];
