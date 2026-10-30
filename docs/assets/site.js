@@ -8,7 +8,7 @@ const PAGES = [
   { group: 'リファレンス', items: [['api.html', 'API リファレンス'], ['ai-skills.html', 'AI 用スキル']] },
 ];
 // パッケージごとのバージョン（scripts/sync-version.mjs が更新する）
-const VERSIONS = { 'formulit': '0.4.0', 'formulit-markdown': '0.2.1' };
+const VERSIONS = { 'formulit': '0.5.0', 'formulit-markdown': '0.2.1' };
 
 const here = (location.pathname.split('/').pop() || 'index.html');
 const IS_MD = here.startsWith('markdown');
