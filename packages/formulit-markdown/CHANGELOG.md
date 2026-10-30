@@ -2,11 +2,19 @@
 
 このパッケージ（`@hidemikimura/formulit-markdown`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
-## [Unreleased]
+## [0.3.0] - 2026-10-30
 
 ### 追加
 
-- リストの項目で Tab / Shift+Tab により入れ子にする・戻す（`- a\n  - b` の形で書き出す）。既定のツールバーに「インデント解除」「インデント」を追加。`@hidemikimura/formulit` の次の版が必要。
+- リストの項目で Tab / Shift+Tab により入れ子にする・戻す（`- a\n  - b` の形で書き出す）。既定のツールバーに「インデント解除」「インデント」を追加。
+
+### 変更
+
+- 必要な `@hidemikimura/formulit` を 0.5.0 以降に変更（peerDependency `^0.5.0`。入れ子の処理は formulit 側にあるため）。
+
+### 動作確認
+
+- Chromium・Firefox・WebKit で自動テスト 53 項目（リストの入れ子 5 項目を追加）に合格。
 
 ## [0.2.1] - 2026-10-28
 
@@ -49,6 +57,7 @@
 
 - Chromium・Firefox・WebKit で自動テスト 46 項目に合格（原文の保持、Markdown への書き出しの往復 23 例、入力変換・ツールバー・ToDo・ソース表示・貼り付け・コピー・フォーム・Lit）。
 
+[0.3.0]: https://github.com/hidemikimura/formulit/releases/tag/formulit-markdown-v0.3.0
 [0.2.1]: https://github.com/hidemikimura/formulit/releases/tag/formulit-markdown-v0.2.1
 [0.2.0]: https://github.com/hidemikimura/formulit/releases/tag/formulit-markdown-v0.2.0
 [0.1.0]: https://github.com/hidemikimura/formulit/releases/tag/formulit-markdown-v0.1.0

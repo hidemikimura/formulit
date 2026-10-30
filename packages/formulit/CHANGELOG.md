@@ -2,7 +2,7 @@
 
 このパッケージ（`@hidemikimura/formulit`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
-## [Unreleased]
+## [0.5.0] - 2026-10-30
 
 ### 追加
 
@@ -12,6 +12,10 @@
 ### 修正
 
 - ツールバーの「インデント」「インデント解除」をリストの中で使うと、`<ul>` の直下に `<ul>` が入る正しくない HTML になっていた（ブラウザの indent の動作）。項目の中に子リストを作る正しい形にした。
+
+### 動作確認
+
+- Chromium・Firefox・WebKit で自動テスト 116 項目（リストの入れ子 1 項目を追加）と formulit-markdown の 53 項目に合格。
 
 ## [0.4.0] - 2026-10-28
 
@@ -125,6 +129,7 @@
 - Chromium・Firefox・WebKit の 3 エンジンで自動テスト 95 項目に合格。
 - macOS の Safari で ⌘ キーのショートカットと日本語入力の確定を手動で確認。
 
+[0.5.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.5.0
 [0.4.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.4.0
 [0.3.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.3.0
 [0.2.1]: https://github.com/hidemikimura/formulit/releases/tag/v0.2.1
