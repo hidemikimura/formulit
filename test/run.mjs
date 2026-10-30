@@ -1147,6 +1147,30 @@ await test('目次：見出しから生成し、見出しの編集に追従（�
   assert(await val() === expected, 'undo: ' + await val());
 });
 
+await test('リスト：Tab で入れ子（li の中の ul）、Shift+Tab で戻す、元に戻すで戻る、表のセルでは表の Tab', async () => {
+  await page.evaluate(() => { ed.value = '<ul><li>a</li><li>b</li></ul>'; });
+  await page.evaluate(() => {
+    const t = ed.editable.querySelectorAll('li')[1].firstChild;
+    ed.focusEditor();
+    const r = document.createRange(); r.setStart(t, 1); r.collapse(true); ed.selectRange(r);
+  });
+  await page.keyboard.press('Tab');
+  assert(await val() === '<ul><li>a<ul><li>b</li></ul></li></ul>', 'Tab: ' + await val());
+  await page.keyboard.press('Shift+Tab');
+  assert(await val() === '<ul><li>a</li><li>b</li></ul>', 'Shift+Tab: ' + await val());
+  await page.keyboard.press('ControlOrMeta+z');
+  assert(await val() === '<ul><li>a<ul><li>b</li></ul></li></ul>', 'undo: ' + await val());
+  await page.evaluate(() => { ed.value = '<ul><li>a</li><li><table><tbody><tr><td>x</td><td>y</td></tr></tbody></table></li></ul>'; });
+  await page.evaluate(() => {
+    const t = ed.editable.querySelector('td').firstChild;
+    ed.focusEditor();
+    const r = document.createRange(); r.setStart(t, 1); r.collapse(true); ed.selectRange(r);
+  });
+  await page.keyboard.press('Tab');
+  const cell = await page.evaluate(() => ed.getRange().startContainer.parentElement.closest('td')?.textContent ?? ed.getRange().startContainer.textContent);
+  assert(cell === 'y' && await val() === '<ul><li>a</li><li><table><tbody><tr><td>x</td><td>y</td></tr></tbody></table></li></ul>', '表: ' + cell + ' ' + await val());
+});
+
 console.log('ツールバーのグループ');
 await test('グループ：指定どおり「履歴▼ | format styles ...▼ | 装飾▼」と表示される', async () => {
   await page.evaluate(() => {

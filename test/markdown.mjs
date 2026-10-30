@@ -357,6 +357,74 @@ await test('差し込み変数は変数名で表示し、Markdown では変数�
   await page.evaluate(() => { ed.variables = null; });
 });
 
+console.log('リストの入れ子');
+/** n 番目の li の、子リストより前の文字の末尾にカーソルを置く */
+const caretInItem = (index) => page.evaluate((i) => {
+  const li = ed.editable.querySelectorAll('li')[i];
+  const t = document.createTreeWalker(li, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.data.trim() ? 1 : 3) }).nextNode();
+  ed.focusEditor();
+  const r = document.createRange(); r.setStart(t, t.length); r.collapse(true); ed.selectRange(r);
+}, index);
+
+await test('Tab で一つ上の項目の子リストにし、Shift+Tab で戻す', async () => {
+  await setVal('- a\n- b\n- c\n');
+  await caretInItem(1);
+  await page.keyboard.press('Tab');
+  eq(await val(), '- a\n  - b\n- c\n');
+  // カーソルは同じ位置のまま入力できる
+  await page.keyboard.type('!');
+  eq(await val(), '- a\n  - b!\n- c\n');
+  await page.keyboard.press('Shift+Tab');
+  eq(await val(), '- a\n- b!\n- c\n');
+});
+
+await test('既にある子リストの末尾に入り、2 段目・番号付き・ToDo も入れ子にできる', async () => {
+  await setVal('- a\n  - x\n- b\n');
+  await caretInItem(2);
+  await page.keyboard.press('Tab');
+  eq(await val(), '- a\n  - x\n  - b\n');
+  await page.keyboard.press('Tab');
+  eq(await val(), '- a\n  - x\n    - b\n');
+  await setVal('1. a\n2. b\n');
+  await caretInItem(1);
+  await page.keyboard.press('Tab');
+  eq(await val(), '1. a\n   1. b\n');
+  await setVal('- [ ] a\n- [x] b\n');
+  await caretInItem(1);
+  await page.keyboard.press('Tab');
+  eq(await val(), '- [ ] a\n  - [x] b\n');
+});
+
+await test('Shift+Tab で戻すと、後ろの項目はその子になって順序を保つ', async () => {
+  await setVal('- a\n  - b\n  - c\n- d\n');
+  await caretInItem(1);
+  await page.keyboard.press('Shift+Tab');
+  eq(await val(), '- a\n- b\n  - c\n- d\n');
+});
+
+await test('先頭の項目の Tab・最上位の Shift+Tab は何もしない（フォーカスも移らない）', async () => {
+  await setVal('- a\n- b\n');
+  await caretInItem(0);
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  eq(await val(), '- a\n- b\n');
+  const focused = await page.evaluate(() => ed.contains(document.activeElement) || ed.shadowRoot.activeElement != null || document.activeElement === ed);
+  if (!focused) throw new Error('フォーカスが外れた');
+});
+
+await test('ツールバーのインデント・インデント解除（複数の項目を選んでまとめて）', async () => {
+  await setVal('- a\n- b\n- c\n');
+  await page.evaluate(() => {
+    const lis = ed.editable.querySelectorAll('li');
+    ed.focusEditor();
+    const r = document.createRange(); r.setStart(lis[1].firstChild, 0); r.setEnd(lis[2].firstChild, 1); ed.selectRange(r);
+  });
+  await click('indent');
+  eq(await val(), '- a\n  - b\n  - c\n');
+  await click('outdent');
+  eq(await val(), '- a\n- b\n- c\n');
+});
+
 console.log('組み込み');
 await test('<script type="text/markdown"> の初期値は共通の字下げを取って読み込む', async () => {
   const out = await page.evaluate(async () => {

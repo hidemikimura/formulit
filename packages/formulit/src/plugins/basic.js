@@ -1,4 +1,5 @@
 import { icons } from '../icons.js';
+import { indentListItems, outdentListItems } from './list-indent.js';
 
 const PARAGRAPH_LIKE = 'p,h1,h2,h3,h4,h5,h6,pre';
 
@@ -89,8 +90,9 @@ export const basicPlugin = {
     sub: cmd('subscript', icons.sub, '下付き'),
     ul: cmd('insertUnorderedList', icons.ul, '箇条書き', { action: (ed) => listCommand(ed, 'insertUnorderedList') }),
     ol: cmd('insertOrderedList', icons.ol, '番号付きリスト', { action: (ed) => listCommand(ed, 'insertOrderedList') }),
-    indent: { icon: icons.indent, title: 'インデント', action: (ed) => ed.exec('indent') },
-    outdent: { icon: icons.outdent, title: 'インデント解除', action: (ed) => ed.exec('outdent') },
+    // リストの中では項目を入れ子にする・戻す（Tab / Shift+Tab と同じ）
+    indent: { icon: icons.indent, title: 'インデント (Tab)', action: (ed) => indentListItems(ed) || ed.exec('indent') },
+    outdent: { icon: icons.outdent, title: 'インデント解除 (Shift+Tab)', action: (ed) => outdentListItems(ed) || ed.exec('outdent') },
     alignLeft: cmd('justifyLeft', icons.alignLeft, '左揃え'),
     alignCenter: cmd('justifyCenter', icons.alignCenter, '中央揃え'),
     alignRight: cmd('justifyRight', icons.alignRight, '右揃え'),

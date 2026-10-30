@@ -32,6 +32,7 @@ export { MEDIA_PROVIDERS, matchMedia } from './plugins/embed.js';
 export { DEFAULT_CODE_LANGUAGES, toCodeBlock } from './plugins/code-block.js';
 export { SLASH_COMMANDS } from './plugins/typing.js';
 export { toggleTodo } from './plugins/lists.js';
+export { indentListItems, outdentListItems } from './plugins/list-indent.js';
 export { findMatches, getStats, saveNow, SHORTCUTS, MARKDOWN_SHORTCUTS } from './plugins/productivity.js';
 export { buildGrid } from './plugins/table.js';
 export { getSelectionRange, setSelectionRange, activeElementOf, caretRangeAt } from './core/selection.js';

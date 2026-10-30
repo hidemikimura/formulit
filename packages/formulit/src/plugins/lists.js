@@ -2,6 +2,7 @@ import { html, nothing } from 'lit';
 import { icons } from '../icons.js';
 import { setTemp } from '../core/html.js';
 import { unwrapListsFromParagraphs } from './basic.js';
+import { listIndentKeymap } from './list-indent.js';
 
 /**
  * ToDo リスト、リストの種類（記号・番号の種類、開始番号、逆順）、改ページ、目次。
@@ -309,6 +310,7 @@ export const listsPlugin = {
   }],
   keymap: {
     Enter: todoEnter,
+    ...listIndentKeymap,
   },
   prepare(root) {
     root.querySelectorAll('ul.todo-list > li > input[type=checkbox]').forEach(prepareCheckbox);

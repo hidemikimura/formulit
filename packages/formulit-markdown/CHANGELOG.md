@@ -2,6 +2,12 @@
 
 このパッケージ（`@hidemikimura/formulit-markdown`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
+## [Unreleased]
+
+### 追加
+
+- リストの項目で Tab / Shift+Tab により入れ子にする・戻す（`- a\n  - b` の形で書き出す）。既定のツールバーに「インデント解除」「インデント」を追加。`@hidemikimura/formulit` の次の版が必要。
+
 ## [0.2.1] - 2026-10-28
 
 ### 追加
