@@ -2,11 +2,19 @@
 
 このパッケージ（`@hidemikimura/formulit-markdown`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
-## [Unreleased]
+## [0.3.1] - 2026-10-30
 
 ### 修正
 
-- 既定のツールバーの「インデント」をリストの外の段落で押すと、Chromium・Safari では `<blockquote style="margin: 0 0 0 40px; …">` の HTML が Markdown に混ざり、Firefox では段落が引用（`>`）になっていた。既定のツールバーを、リストの中だけで動く `listIndent` / `listOutdent` に変更（リストの外では押せない）。`@hidemikimura/formulit` の次の版が必要。
+- 既定のツールバーの「インデント」をリストの外の段落で押すと、Chromium・Safari では `<blockquote style="margin: 0 0 0 40px; …">` の HTML が Markdown に混ざり、Firefox では段落が引用（`>`）になっていた。既定のツールバーを、リストの中だけで動く `listIndent` / `listOutdent` に変更（リストの外では押せない）。
+
+### 変更
+
+- 必要な `@hidemikimura/formulit` を 0.5.1 以降に変更（peerDependency `^0.5.1`。`listIndent` / `listOutdent` は formulit 0.5.1 で追加）。
+
+### 動作確認
+
+- Chromium・Firefox・WebKit で自動テスト 54 項目（リストの外の段落でのインデント 1 項目を追加）に合格。
 
 ## [0.3.0] - 2026-10-30
 
@@ -63,6 +71,7 @@
 
 - Chromium・Firefox・WebKit で自動テスト 46 項目に合格（原文の保持、Markdown への書き出しの往復 23 例、入力変換・ツールバー・ToDo・ソース表示・貼り付け・コピー・フォーム・Lit）。
 
+[0.3.1]: https://github.com/hidemikimura/formulit/releases/tag/formulit-markdown-v0.3.1
 [0.3.0]: https://github.com/hidemikimura/formulit/releases/tag/formulit-markdown-v0.3.0
 [0.2.1]: https://github.com/hidemikimura/formulit/releases/tag/formulit-markdown-v0.2.1
 [0.2.0]: https://github.com/hidemikimura/formulit/releases/tag/formulit-markdown-v0.2.0
