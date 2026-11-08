@@ -2,11 +2,15 @@
 
 このパッケージ（`@hidemikimura/formulit`）の主な変更を記録します。書式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に、バージョンは [セマンティック バージョニング](https://semver.org/lang/ja/) に従います（1.0.0 までは、マイナーバージョンの更新で API が変わることがあります）。
 
-## [Unreleased]
+## [0.5.2] - 2026-11-08
 
 ### 追加
 
 - CSS 変数 `--formulit-toolbar-top`：スクロールしたときにツールバーが止まる位置（既定 0）。固定ヘッダーのあるページでは、ヘッダーの高さを指定するとツールバーがヘッダーの下に潜り込まない（例: `formulit-editor { --formulit-toolbar-top: 56px; }`）。全画面表示では 0 に戻る。
+
+### 動作確認
+
+- Chromium・Firefox・WebKit で自動テスト 117 項目（ツールバーの固定位置 1 項目を追加）と formulit-markdown の 54 項目に合格。
 
 ## [0.5.1] - 2026-10-30
 
@@ -145,6 +149,7 @@
 - Chromium・Firefox・WebKit の 3 エンジンで自動テスト 95 項目に合格。
 - macOS の Safari で ⌘ キーのショートカットと日本語入力の確定を手動で確認。
 
+[0.5.2]: https://github.com/hidemikimura/formulit/releases/tag/v0.5.2
 [0.5.1]: https://github.com/hidemikimura/formulit/releases/tag/v0.5.1
 [0.5.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.5.0
 [0.4.0]: https://github.com/hidemikimura/formulit/releases/tag/v0.4.0
