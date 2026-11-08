@@ -107,7 +107,7 @@ html`<formulit-editor .value=${this.body} @input=${(e) => (this.body = e.target.
 
 イベント: `input`（変更のたび）、`change`（フォーカスが外れたとき）、`formulit-mode`（ソース表示の切替）、`formulit-upload` / `formulit-upload-error`（画像アップロードの完了・失敗。`detail.file` / `detail.url` / `detail.error`）、`formulit-autosave` / `formulit-autosave-error`、`formulit-fullscreen`、`formulit-variable-insert`（変数の挿入。`detail.variable` / `detail.text`）
 
-CSS カスタムプロパティ: `--formulit-min-height` `--formulit-padding` `--formulit-border` `--formulit-radius` `--formulit-bg` `--formulit-toolbar-bg` `--formulit-surface`（ドロップダウン・ダイアログの背景） `--formulit-text`（ボタンなどの文字） `--formulit-muted`（補足の文字） `--formulit-accent`（フォーカス・選択の色）、`::part(toolbar)` `::part(source)`
+CSS カスタムプロパティ: `--formulit-min-height` `--formulit-padding` `--formulit-border` `--formulit-radius` `--formulit-bg` `--formulit-toolbar-bg` `--formulit-surface`（ドロップダウン・ダイアログの背景） `--formulit-text`（ボタンなどの文字） `--formulit-muted`（補足の文字） `--formulit-accent`（フォーカス・選択の色） `--formulit-toolbar-top`（スクロールしたときにツールバーが止まる位置。固定ヘッダーがあるページではその高さ。全画面表示では 0）、`::part(toolbar)` `::part(source)`
 
 #### ダークモード
 

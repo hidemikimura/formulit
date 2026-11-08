@@ -129,7 +129,7 @@ export class FormulitEditor extends LitElement {
     :host { display:block; border:1px solid var(--_fl-border); border-radius:var(--formulit-radius,6px);
       background:var(--_fl-bg); color:inherit; position:relative; }
     :host([fullscreen]) { position:fixed; inset:0; z-index:2147483000; border-radius:0; display:flex; flex-direction:column; border:0; }
-    :host([fullscreen]) .toolbar { border-radius:0; }
+    :host([fullscreen]) .toolbar { border-radius:0; top:0; }
     :host([fullscreen]) .body { flex:1; overflow:auto; }
     :host([fullscreen]) ::slotted(.formulit-editable) { max-width:var(--formulit-fullscreen-width, 860px); margin:0 auto; min-height:100%; }
     .status { display:flex; gap:14px; justify-content:flex-end; align-items:center; padding:3px 10px; min-height:22px;
@@ -160,7 +160,7 @@ export class FormulitEditor extends LitElement {
     .dialog .content { max-height:60vh; overflow:auto; }
     .toolbar { display:flex; flex-wrap:wrap; gap:2px; align-items:center; padding:4px 6px;
       border-bottom:1px solid var(--_fl-border); background:var(--_fl-toolbar-bg);
-      border-radius:var(--formulit-radius,6px) var(--formulit-radius,6px) 0 0; position:sticky; top:0; z-index:2; }
+      border-radius:var(--formulit-radius,6px) var(--formulit-radius,6px) 0 0; position:sticky; top:var(--formulit-toolbar-top, 0px); z-index:2; }
     button { all:unset; box-sizing:border-box; display:inline-flex; align-items:center; justify-content:center;
       min-width:30px; height:30px; padding:0 6px; border-radius:4px; cursor:pointer; color:var(--_fl-text); font:600 14px/1 system-ui,sans-serif; }
     button:hover:not([disabled]) { background:var(--_fl-hover); }

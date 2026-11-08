@@ -118,7 +118,7 @@ JS プロパティだけで渡すもの（`null` なら既定値）:
 
 ## 見た目の調整
 
-CSS 変数（ホスト要素に指定）: `--formulit-min-height`（240px）、`--formulit-padding`（12px 16px）、`--formulit-border`、`--formulit-radius`、`--formulit-bg`、`--formulit-toolbar-bg`、`--formulit-surface`（ドロップダウン・ダイアログ）、`--formulit-text`（UI の文字）、`--formulit-muted`、`--formulit-accent`、`--formulit-fullscreen-width`（860px）。
+CSS 変数（ホスト要素に指定）: `--formulit-min-height`（240px）、`--formulit-padding`（12px 16px）、`--formulit-border`、`--formulit-radius`、`--formulit-bg`、`--formulit-toolbar-bg`、`--formulit-surface`（ドロップダウン・ダイアログ）、`--formulit-text`（UI の文字）、`--formulit-muted`、`--formulit-accent`、`--formulit-toolbar-top`（ツールバーが止まる位置。既定 0。固定ヘッダーの高さを指定。全画面では 0）、`--formulit-fullscreen-width`（860px）。
 
 `::part()`: `toolbar`、`body`、`source`（HTML ソースの textarea）、`status`（ステータスバー）。
 

@@ -1708,6 +1708,33 @@ await test('--formulit-bg などの CSS 変数はダークでも優先し、valu
   assert(r.bg === 'rgb(1, 2, 3)' && r.value === '<p>a</p>', JSON.stringify(r));
 });
 
+console.log('ツールバーの固定位置');
+await test('--formulit-toolbar-top でツールバーの固定位置を下げ、全画面では 0 に戻る', async () => {
+  const top = () => page.evaluate(() => getComputedStyle(ed.shadowRoot.querySelector('.toolbar')).top);
+  assert(await top() === '0px', '既定: ' + await top());
+  await page.evaluate(() => ed.style.setProperty('--formulit-toolbar-top', '56px'));
+  assert(await top() === '56px', '指定: ' + await top());
+  // ページをスクロールすると、ツールバーは画面の上から 56px の位置で止まる
+  const stuck = await page.evaluate(async () => {
+    const spacer = document.createElement('div');
+    spacer.style.height = '3000px';
+    document.body.append(spacer);
+    ed.value = '<p>x</p>'.repeat(200);
+    await ed.updateComplete;
+    window.scrollTo(0, ed.getBoundingClientRect().top + window.scrollY + 400);
+    await new Promise(requestAnimationFrame);
+    const y = ed.shadowRoot.querySelector('.toolbar').getBoundingClientRect().top;
+    window.scrollTo(0, 0);
+    spacer.remove();
+    return Math.round(y);
+  });
+  assert(stuck === 56, 'スクロール時の位置: ' + stuck);
+  await page.evaluate(() => { ed.fullscreen = true; });
+  await page.evaluate(() => ed.updateComplete);
+  assert(await top() === '0px', '全画面: ' + await top());
+  await page.evaluate(() => { ed.fullscreen = false; ed.style.removeProperty('--formulit-toolbar-top'); ed.value = '<p>a</p>'; });
+});
+
 console.log('フォーム連携');
 await test('form の FormData に value が入る・reset で初期値に戻る', async () => {
   await setVal('<p>form</p>');

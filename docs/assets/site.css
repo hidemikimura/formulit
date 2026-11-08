@@ -17,6 +17,8 @@
 }
 * { box-sizing: border-box; }
 html { scroll-padding-top: calc(var(--header-h) + 16px); }
+/* エディタのツールバーが固定ヘッダーの下に潜り込まないように */
+formulit-editor, formulit-markdown { --formulit-toolbar-top: var(--header-h); }
 body {
   margin: 0; background: var(--bg); color: var(--text);
   font: 15px/1.8 system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
