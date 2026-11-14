@@ -65,12 +65,19 @@ const BLOCK_RULES = [
   { re: /^```([\w+#-]*) $/, run: 'code' },
 ];
 
+// d フラグ：中身の位置（m.indices）を使い、元の文字列から取り出すため（foldIme で記号だけ置き換えて照合する）
 const INLINE_RULES = [
-  { re: /(\*\*|__)(?=\S)([^*_]+?)(?<=\S)\1$/u, tag: 'b', group: 2 },
-  { re: /~~(?=\S)([^~]+?)(?<=\S)~~$/u, tag: 's', group: 1 },
-  { re: /`([^`]+)`$/u, tag: 'code', group: 1 },
-  { re: /(?<![*_\p{L}\p{N}])([*_])(?=\S)([^*_]+?)(?<=\S)\1$/u, tag: 'i', group: 2 },
+  { re: /(\*\*|__)(?=\S)([^*_]+?)(?<=\S)\1$/du, tag: 'b', group: 2 },
+  { re: /~~(?=\S)([^~]+?)(?<=\S)~~$/du, tag: 's', group: 1 },
+  { re: /`([^`]+)`$/du, tag: 'code', group: 1 },
+  { re: /(?<![*_\p{L}\p{N}])([*_])(?=\S)([^*_]+?)(?<=\S)\1$/du, tag: 'i', group: 2 },
 ];
+
+/**
+ * 日本語入力でよく入る全角の ｀ と全角空白を、入力変換の記号としては半角と同じに扱う（文字数は変わらない）。
+ * 全角の ＊ ＿ ～ は普通の文でも使うので対象にしない。
+ */
+const foldIme = (s) => s.replace(/｀/g, '`').replace(/\u3000/g, ' ');
 
 function autoformatBlock(ed, node, offset) {
   const block = closestBlock(node, ed.editable);
@@ -78,7 +85,7 @@ function autoformatBlock(ed, node, offset) {
   const pre = document.createRange();
   pre.setStart(block, 0);
   pre.setEnd(node, offset);
-  const before = pre.toString().replace(/ /g, ' ');
+  const before = foldIme(pre.toString()).replace(/ /g, ' ');
   for (const rule of BLOCK_RULES) {
     const m = before.match(rule.re);
     if (!m) continue;
@@ -111,8 +118,9 @@ function autoformatHr(ed, node) {
 
 function autoformatInline(ed, node, offset) {
   const text = node.data.slice(0, offset);
+  const folded = foldIme(text);
   for (const rule of INLINE_RULES) {
-    const m = text.match(rule.re);
+    const m = folded.match(rule.re);
     if (!m) continue;
     const start = offset - m[0].length;
     ed.transact(() => {
@@ -121,7 +129,7 @@ function autoformatInline(ed, node, offset) {
       r.setEnd(node, offset);
       r.deleteContents();
       const el = document.createElement(rule.tag);
-      el.textContent = m[rule.group];
+      el.textContent = text.slice(...m.indices[rule.group]);
       r.insertNode(el);
       // 続けて入力した文字が装飾の外に入るよう、直後にテキストノードを置いてそこへカーソルを移す
       // （ブラウザはカーソルを装飾の中に入れがちなので、次の 1 文字は自前で入れる: onBeforeInput）
@@ -133,6 +141,20 @@ function autoformatInline(ed, node, offset) {
     return true;
   }
   return false;
+}
+
+/** 文字を入れた直後（data は入れた文字列）の入力変換。キー入力でも、日本語入力の確定でも呼ぶ */
+function autoformatAfter(ed, data) {
+  if (ed.autoformat === false) return;
+  const r = ed.getRange();
+  if (!r?.collapsed || r.startContainer.nodeType !== 3 || inCode(r.startContainer)) return;
+  const node = r.startContainer;
+  const offset = r.startOffset;
+  const last = foldIme(data.at(-1) ?? '');
+  if (!last) return;
+  if (last === ' ' || last === '\u00a0') { if (autoformatBlock(ed, node, offset)) return; }
+  if (last === '-') { if (autoformatHr(ed, node)) return; }
+  if ('*_`~'.includes(last)) autoformatInline(ed, node, offset);
 }
 
 /* ================= スラッシュコマンド ================= */
@@ -311,6 +333,13 @@ export const typingPlugin = {
     ed.editable.addEventListener('input', onParagraph);
     ed.editable.addEventListener('beforeinput', onBeforeInput);
     ed.editable.addEventListener('compositionend', onCompositionEnd);
+    // 日本語入力で確定した文字は、キー入力の input では変換されないので確定時に変換する
+    // （装飾の外へ出す処理 onCompositionEnd の後に動くよう、setTimeout の順で並べる）
+    const onCompositionAutoformat = (e) => {
+      if (!e.data) return;
+      setTimeout(() => { if (!slashes.has(ed)) autoformatAfter(ed, e.data); });
+    };
+    ed.editable.addEventListener('compositionend', onCompositionAutoformat);
     const onInput = (e) => {
       if (e.isComposing) return;
       const r = ed.getRange();
@@ -334,10 +363,7 @@ export const typingPlugin = {
         })();
         if (blockStart || prev === ' ' || prev === ' ') { openSlash(ed, node, offset - 1); return; }
       }
-      if (ed.autoformat === false) return;
-      if (last === ' ' || last === ' ') { if (autoformatBlock(ed, node, offset)) return; }
-      if (last === '-') { if (autoformatHr(ed, node)) return; }
-      if ('*_`~'.includes(last)) autoformatInline(ed, node, offset);
+      autoformatAfter(ed, data);
     };
     const onSel = () => { if (slashes.has(ed)) updateSlash(ed); };
     const onBlur = () => setTimeout(() => { if (!ed.matches(':focus-within')) closeSlash(ed); }, 0);
@@ -348,6 +374,7 @@ export const typingPlugin = {
       ed.editable.removeEventListener('beforeinput', onBeforeInput);
       ed.editable.removeEventListener('input', onParagraph);
       ed.editable.removeEventListener('compositionend', onCompositionEnd);
+      ed.editable.removeEventListener('compositionend', onCompositionAutoformat);
       ed.editable.removeEventListener('input', onInput);
       ed.removeEventListener('formulit-selectionchange', onSel);
       ed.editable.removeEventListener('blur', onBlur);

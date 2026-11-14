@@ -357,6 +357,73 @@ await test('差し込み変数は変数名で表示し、Markdown では変数�
   await page.evaluate(() => { ed.variables = null; });
 });
 
+console.log('日本語入力（IME）での入力変換');
+/**
+ * IME で text を確定したのと同じ状態にする。
+ * Chromium は実際の IME 入力（CDP）、ほかのブラウザは文字を入れてから compositionend を送る。
+ */
+const imeCommit = async (text) => {
+  if (browserName === 'chromium') {
+    const cdp = await page.context().newCDPSession(page);
+    for (let i = 1; i <= text.length; i++) await cdp.send('Input.imeSetComposition', { text: text.slice(0, i), selectionStart: i, selectionEnd: i });
+    await cdp.send('Input.insertText', { text });
+    await cdp.detach();
+  } else {
+    await page.evaluate((t) => {
+      const r = ed.getRange();
+      let node = r.startContainer;
+      if (node.nodeType !== 3) {
+        const tn = document.createTextNode('');
+        r.insertNode(tn);
+        node = tn;
+        r.setStart(tn, 0);
+      }
+      node.insertData(r.startOffset, t);
+      ed.setCaretAt(node, r.startOffset + t.length);
+      ed.editable.dispatchEvent(new CompositionEvent('compositionend', { data: t, bubbles: true }));
+    }, text);
+  }
+  await page.waitForTimeout(60);
+};
+const atNewParagraph = async () => {
+  await setVal('z\n');
+  await typeAtEnd('p', '');
+  await page.keyboard.press('Enter');
+};
+
+await test('IME で確定した `あいうえお`・全角の ｀あいうえお｀ はインラインコードになる', async () => {
+  await atNewParagraph();
+  await imeCommit('`あいうえお`');
+  eq(await val(), 'z\n\n`あいうえお`\n');
+  await atNewParagraph();
+  await imeCommit('｀あいうえお｀');
+  eq(await val(), 'z\n\n`あいうえお`\n');
+  // 続けて入力した文字はコードの外
+  await page.keyboard.type('a');
+  eq(await val(), 'z\n\n`あいうえお`a\n');
+});
+
+await test('IME で確定した ``` / ｀｀｀ と全角空白でコードブロックになる', async () => {
+  await atNewParagraph();
+  await imeCommit('```');
+  await imeCommit('\u3000');
+  eq(await val(), 'z\n\n```plaintext\n```\n');
+  await atNewParagraph();
+  await imeCommit('｀｀｀　');
+  eq(await val(), 'z\n\n```plaintext\n```\n');
+});
+
+await test('全角空白で見出し・箇条書きにもなる。全角の ＊ ～ は記号として扱わない', async () => {
+  await atNewParagraph();
+  await page.keyboard.type('#');
+  await imeCommit('\u3000');
+  await page.keyboard.type('T');
+  eq(await val(), 'z\n\n# T\n');
+  await atNewParagraph();
+  await imeCommit('＊注意＊と～～だ～～');
+  eq(await val(), 'z\n\n＊注意＊と～～だ～～\n');
+});
+
 console.log('リストの入れ子');
 /** n 番目の li の、子リストより前の文字の末尾にカーソルを置く */
 const caretInItem = (index) => page.evaluate((i) => {
