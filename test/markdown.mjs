@@ -424,6 +424,39 @@ await test('全角空白で見出し・箇条書きにもなる。全角の ＊ 
   eq(await val(), 'z\n\n＊注意＊と～～だ～～\n');
 });
 
+await test('``` / ```js の行で Enter を押すとコードブロックになる（言語指定・IME の確定でも）', async () => {
+  await atNewParagraph();
+  await page.keyboard.type('```');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('a');
+  eq(await val(), 'z\n\n```plaintext\na\n```\n');
+  await atNewParagraph();
+  await page.keyboard.type('```js');
+  await page.keyboard.press('Enter');
+  eq(await val(), 'z\n\n```js\n```\n');
+  await atNewParagraph();
+  await imeCommit('｀｀｀');
+  await page.keyboard.press('Enter');
+  eq(await val(), 'z\n\n```plaintext\n```\n');
+  // 1 回の「元に戻す」で、入力した ｀｀｀ の行に戻る
+  await page.keyboard.press('ControlOrMeta+z');
+  eq(await val(), 'z\n\n｀｀｀\n');
+});
+
+await test('``` の後ろに文字がある・文中の ``` では Enter で普通に改行する', async () => {
+  await atNewParagraph();
+  await page.keyboard.type('a```');
+  await page.keyboard.press('Enter');
+  await page.keyboard.type('b');
+  eq(await val(), 'z\n\na\\`\\`\\`\n\nb\n');
+  // ``` の直後にカーソルがあっても、後ろに文字が続く場合は改行
+  await atNewParagraph();
+  await page.keyboard.type('```x');
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('Enter');
+  eq(await val(), 'z\n\n\\`\\`\\`\n\nx\n');
+});
+
 console.log('リストの入れ子');
 /** n 番目の li の、子リストより前の文字の末尾にカーソルを置く */
 const caretInItem = (index) => page.evaluate((i) => {

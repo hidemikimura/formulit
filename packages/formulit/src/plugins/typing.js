@@ -1,6 +1,6 @@
 import { html } from 'lit';
 import { closestBlock } from '../core/inline.js';
-import { toCodeBlock } from './code-block.js';
+import { toCodeBlock, toCodeBlockAtSelection } from './code-block.js';
 import { toggleQuote, unwrapListsFromParagraphs } from './basic.js';
 import { toggleTodo } from './lists.js';
 
@@ -143,6 +143,34 @@ function autoformatInline(ed, node, offset) {
   return false;
 }
 
+/**
+ * 行が ``` / ```言語名 だけのときの Enter：改行せずコードブロックにする（GitHub・Typora と同じ）。
+ * カーソルが行末にある場合だけ。変換したら true。
+ */
+function autoformatFenceOnEnter(ed) {
+  if (ed.autoformat === false) return false;
+  const r = ed.getRange();
+  if (!r?.collapsed) return false;
+  const block = closestBlock(r.startContainer, ed.editable);
+  if (!block?.matches('p, div') || block.closest('li,td,th,blockquote,pre')) return false;
+  const before = document.createRange();
+  before.setStart(block, 0);
+  before.setEnd(r.startContainer, r.startOffset);
+  const after = document.createRange();
+  after.setStart(r.startContainer, r.startOffset);
+  after.setEnd(block, block.childNodes.length);
+  if (after.toString().replace(/[\s\u00a0]/g, '')) return false;
+  const m = foldIme(before.toString()).replace(/\u00a0/g, ' ').trim().match(/^```([\w+#-]*)$/);
+  if (!m) return false;
+  // ``` を消してコードブロックにするまでを 1 つの履歴にする（1 回の「元に戻す」で ``` の行に戻る）
+  ed.transact(() => {
+    block.replaceChildren(document.createElement('br'));
+    ed.setCaretAt(block, 0);
+    toCodeBlockAtSelection(ed, m[1] || 'plaintext');
+  });
+  return true;
+}
+
 /** 文字を入れた直後（data は入れた文字列）の入力変換。キー入力でも、日本語入力の確定でも呼ぶ */
 function autoformatAfter(ed, data) {
   if (ed.autoformat === false) return;
@@ -271,7 +299,10 @@ export const typingPlugin = {
   keymap: {
     ArrowDown: slashKey((ed) => { const st = slashes.get(ed); if (st.list.length) st.index = (st.index + 1) % st.list.length; ed.requestUpdate(); }),
     ArrowUp: slashKey((ed) => { const st = slashes.get(ed); if (st.list.length) st.index = (st.index - 1 + st.list.length) % st.list.length; ed.requestUpdate(); }),
-    Enter: (ed) => (slashes.get(ed)?.list.length ? (runSlash(ed), true) : false),
+    Enter: (ed) => {
+      if (slashes.get(ed)?.list.length) { runSlash(ed); return true; }
+      return autoformatFenceOnEnter(ed);
+    },
     Tab: (ed) => (slashes.get(ed)?.list.length ? (runSlash(ed), true) : false),
     Escape: slashKey((ed) => closeSlash(ed)),
   },

@@ -42,7 +42,12 @@ function setLanguage(code, lang) {
 }
 
 export function toCodeBlock(ed, lang) {
-  ed.transact(() => {
+  ed.transact(() => toCodeBlockAtSelection(ed, lang));
+}
+
+/** toCodeBlock の本体（transact の中から呼ぶ用） */
+export function toCodeBlockAtSelection(ed, lang) {
+  {
     const pre = preAt(ed);
     if (pre) {
       // 既存のコードブロックは言語だけ変える
@@ -71,7 +76,7 @@ export function toCodeBlock(ed, lang) {
       const t = code.firstChild;
       ed.setCaretAt(t, t.length);
     }
-  });
+  }
 }
 
 function fromCodeBlock(ed) {
